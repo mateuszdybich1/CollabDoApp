@@ -19,7 +19,6 @@ class LoginActivity : AppCompatActivity() {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-
         val emailErrorObj = ErrorObj(binding.EmailET, binding.EmailETL)
         val passErrorObj = ErrorObj(binding.PasswordET, binding.PasswordETL)
 
@@ -29,14 +28,11 @@ class LoginActivity : AppCompatActivity() {
 
             val transition = ButtonTransition(binding.loginLayout,binding.BtnTV, binding.LoadingCircle,binding.LoginBTN, this@LoginActivity)
 
-
-
             email = binding.EmailET.text.toString()
             password = binding.PasswordET.text.toString()
 
             val emailValidation = Validation.ValidateEmail(email)
             val passwrodValidation = Validation.ValidatePassword(password)
-
 
 
             if(emailValidation.IsValid && passwrodValidation.IsValid) {
@@ -49,8 +45,8 @@ class LoginActivity : AppCompatActivity() {
                         Log.d("KEYCLOAK","Access Token: ${tokenData.AccessToken}")
                         println("Refresh Token: ${tokenData.RefreshToken}")
                     }
+                    transition.stopLoading()
                 }
-                transition.stopLoading()
             }
             else {
                 if(!emailValidation.IsValid ){
@@ -59,9 +55,7 @@ class LoginActivity : AppCompatActivity() {
                 if(!passwrodValidation.IsValid){
                     binding.PasswordETL.error = passwrodValidation.ErrorMessage
                 }
-
             }
-
         }
 
         binding.ForgotPassTV.setOnClickListener(){}
@@ -71,10 +65,5 @@ class LoginActivity : AppCompatActivity() {
             val intent = Intent(this, RegisterActivity::class.java)
             startActivity(intent)
         }
-
     }
-
-
-
-
 }

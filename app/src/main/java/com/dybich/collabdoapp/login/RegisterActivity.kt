@@ -5,9 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import com.dybich.collabdoapp.Dtos.UserRegisterDto
-import com.dybich.collabdoapp.R
 import com.dybich.collabdoapp.RetrofitAPI
-import com.dybich.collabdoapp.databinding.ActivityLoginBinding
 import com.dybich.collabdoapp.databinding.ActivityRegisterBinding
 
 class RegisterActivity : AppCompatActivity() {
@@ -66,8 +64,6 @@ class RegisterActivity : AppCompatActivity() {
                         Toast.makeText(this,error.message.toString(),Toast.LENGTH_LONG).show()
                         transition.stopLoading()
                     })
-
-
 
             }
             else{
