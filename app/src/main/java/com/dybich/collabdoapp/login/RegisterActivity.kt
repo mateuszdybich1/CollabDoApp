@@ -1,5 +1,6 @@
 package com.dybich.collabdoapp.login
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -56,9 +57,20 @@ class RegisterActivity : AppCompatActivity() {
 
                 RetrofitAPI.registerUser(registerObj,
                     onSuccess = { userId ->
-                        Log.d("TAG",userId)
-                        Toast.makeText(this,userId,Toast.LENGTH_LONG).show()
-                        transition.stopLoading()
+
+                        RetrofitAPI.verifyEmail(email,onSuccess = { isVerified ->
+
+                            if(!isVerified){
+                                Toast.makeText(this, "Success! Sent verification email",Toast.LENGTH_LONG).show()
+                                val intent = Intent(this, LoginActivity::class.java)
+                                startActivity(intent)
+                            }
+                            transition.stopLoading()
+                        },
+                        onFailure = { error ->
+                            Toast.makeText(this,error.message.toString(),Toast.LENGTH_LONG).show()
+                            transition.stopLoading()
+                        })
                     },
                     onFailure = { error ->
                         Toast.makeText(this,error.message.toString(),Toast.LENGTH_LONG).show()

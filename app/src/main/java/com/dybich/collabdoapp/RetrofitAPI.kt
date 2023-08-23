@@ -20,8 +20,6 @@ object RetrofitAPI {
         .build()
 
 
-
-
     fun registerUser(userRegisterDto: UserRegisterDto, onSuccess: (String) -> Unit, onFailure: (Throwable) -> Unit){
         val retrofitAPI = retrofit.create(IRetrofitAPI::class.java)
         val call = retrofitAPI.registerUser(userRegisterDto)
@@ -40,12 +38,35 @@ object RetrofitAPI {
                     onFailure(Throwable(errorBody))
                 }
             }
-
             override fun onFailure(call: Call<String>, t: Throwable) {
+                onFailure(Throwable(t.message.toString()))
+            }
+        })
+    }
+
+    fun verifyEmail(email : String, onSuccess: (Boolean) -> Unit, onFailure: (Throwable) -> Unit) {
+        val retrofitAPI = retrofit.create(IRetrofitAPI::class.java)
+        val call = retrofitAPI.verifyEmail(email)
+
+        call.enqueue(object : Callback<Boolean> {
+            override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
+                if (response.isSuccessful) {
+                    val isVerified = response.body()
+                    if (isVerified != null) {
+                        onSuccess(isVerified)
+                    } else {
+                        onFailure(Throwable("ERROR"))
+                    }
+                } else {
+                    val errorBody = response.errorBody()?.string()
+                    onFailure(Throwable(errorBody))
+                }
+            }
+
+            override fun onFailure(call: Call<Boolean>, t: Throwable) {
                 onFailure(Throwable(t.message.toString()))
             }
 
         })
-
     }
 }

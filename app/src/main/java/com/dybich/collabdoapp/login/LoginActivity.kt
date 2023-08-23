@@ -4,7 +4,9 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import com.dybich.collabdoapp.Keycloak.KeycloakToken
+import com.dybich.collabdoapp.RetrofitAPI
 import com.dybich.collabdoapp.databinding.ActivityLoginBinding
 import kotlinx.coroutines.*
 class LoginActivity : AppCompatActivity() {
@@ -39,14 +41,29 @@ class LoginActivity : AppCompatActivity() {
 
                 transition.startLoading()
 
-                CoroutineScope(Dispatchers.Main).launch {
-                    val tokenData = KeycloakToken.loginResponse(email, password,this@LoginActivity)
-                    if (tokenData != null) {
-                        Log.d("KEYCLOAK","Access Token: ${tokenData.AccessToken}")
-                        println("Refresh Token: ${tokenData.RefreshToken}")
+                RetrofitAPI.verifyEmail(email,onSuccess = { isVerified ->
+
+                    if(isVerified){
+
+                        CoroutineScope(Dispatchers.Main).launch {
+                            val tokenData = KeycloakToken.loginResponse(email, password,this@LoginActivity)
+                            if (tokenData != null) {
+                                Log.d("KEYCLOAK","Access Token: ${tokenData.AccessToken}")
+                                println("Refresh Token: ${tokenData.RefreshToken}")
+                            }
+                        }
+                    }
+                    else{
+                        Toast.makeText(this, "Please verify your email", Toast.LENGTH_LONG).show()
                     }
                     transition.stopLoading()
-                }
+                },
+                onFailure = { error ->
+                    Toast.makeText(this,error.message.toString(), Toast.LENGTH_LONG).show()
+                    transition.stopLoading()
+                })
+
+
             }
             else {
                 if(!emailValidation.IsValid ){
