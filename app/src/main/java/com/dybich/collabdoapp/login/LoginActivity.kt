@@ -6,32 +6,40 @@ import android.os.Bundle
 import android.util.Log
 import com.dybich.collabdoapp.Keycloak.KeycloakToken
 import com.dybich.collabdoapp.databinding.ActivityLoginBinding
-
-
 import kotlinx.coroutines.*
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding : ActivityLoginBinding
 
+    private lateinit var email : String
+    private lateinit var password : String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val layout = binding.loginLayout
+
+        val emailErrorObj = ErrorObj(binding.EmailET, binding.EmailETL)
+        val passErrorObj = ErrorObj(binding.PasswordET, binding.PasswordETL)
+
+        ClearErrors.clearErrors(listOf(emailErrorObj,passErrorObj))
 
         binding.LoginBTN.setOnClickListener(){
 
-            val transition = ButtonTransition(layout,binding.BtnTV, binding.LoadingCircle,binding.LoginBTN, this@LoginActivity)
+            val transition = ButtonTransition(binding.loginLayout,binding.BtnTV, binding.LoadingCircle,binding.LoginBTN, this@LoginActivity)
 
-            binding.EmailETL.error = null
-            binding.PasswordETL.error = null
 
-            val email = binding.EmailET.text.toString()
-            val password = binding.PasswordET.text.toString()
 
-            if(EmailValidation.IsEmailValid(email)) {
+            email = binding.EmailET.text.toString()
+            password = binding.PasswordET.text.toString()
+
+            val emailValidation = Validation.ValidateEmail(email)
+            val passwrodValidation = Validation.ValidatePassword(password)
+
+
+
+            if(emailValidation.IsValid && passwrodValidation.IsValid) {
 
                 transition.startLoading()
 
@@ -45,7 +53,13 @@ class LoginActivity : AppCompatActivity() {
                 transition.stopLoading()
             }
             else {
-                binding.EmailETL.error = "Incorrect email"
+                if(!emailValidation.IsValid ){
+                    binding.EmailETL.error = emailValidation.ErrorMessage
+                }
+                if(!passwrodValidation.IsValid){
+                    binding.PasswordETL.error = passwrodValidation.ErrorMessage
+                }
+
             }
 
         }
