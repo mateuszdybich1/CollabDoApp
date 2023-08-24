@@ -1,14 +1,10 @@
-package com.dybich.collabdoapp
+package com.dybich.collabdoapp.IRetrofitAPI
 
 import com.dybich.collabdoapp.Dtos.UserRegisterDto
 import retrofit2.Call
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.PUT
+import retrofit2.http.*
 
-interface IRetrofitAPI {
-
+interface IUserAPI {
 
     @POST("user")
     fun registerUser(@Body userRegisterDto: UserRegisterDto) : Call<String>
@@ -17,6 +13,6 @@ interface IRetrofitAPI {
     @PUT("user/verify")
     fun verifyEmail(@Body email : String) : Call<Boolean>
 
-    @GET("employee")
-    fun getEmployeeDto() : Call<UserRegisterDto>
+    @GET("user")
+    fun isUserLeader(@Header("Authorization") token: String) : Call<Boolean>
 }

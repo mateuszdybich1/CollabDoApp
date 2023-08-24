@@ -6,9 +6,11 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import com.dybich.collabdoapp.Keycloak.KeycloakToken
-import com.dybich.collabdoapp.RetrofitAPI
+import com.dybich.collabdoapp.API.UserAPI
+import com.dybich.collabdoapp.LeaderRequestActivity
 import com.dybich.collabdoapp.databinding.ActivityLoginBinding
 import kotlinx.coroutines.*
+
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding : ActivityLoginBinding
@@ -34,22 +36,39 @@ class LoginActivity : AppCompatActivity() {
             password = binding.PasswordET.text.toString()
 
             val emailValidation = Validation.ValidateEmail(email)
-            val passwrodValidation = Validation.ValidatePassword(password)
+            val passwordValidation = Validation.ValidatePassword(password)
 
 
-            if(emailValidation.IsValid && passwrodValidation.IsValid) {
+            if(emailValidation.IsValid && passwordValidation.IsValid) {
 
                 transition.startLoading()
 
-                RetrofitAPI.verifyEmail(email,onSuccess = { isVerified ->
+                UserAPI.verifyEmail(email,this@LoginActivity, onSuccess = { isVerified ->
 
                     if(isVerified){
 
                         CoroutineScope(Dispatchers.Main).launch {
-                            val tokenData = KeycloakToken.loginResponse(email, password,this@LoginActivity)
+
+                            val tokenData = KeycloakToken.getFromEmailAndPass(email, password,this@LoginActivity)
+
                             if (tokenData != null) {
                                 Log.d("KEYCLOAK","Access Token: ${tokenData.AccessToken}")
                                 println("Refresh Token: ${tokenData.RefreshToken}")
+
+                                UserAPI.isUserLeader(tokenData.AccessToken,this@LoginActivity,onSuccess = { isLeader ->
+
+                                    Log.d("ISLEADER",isLeader.toString())
+                                    if(!isLeader){
+                                        val intent = Intent(this@LoginActivity, LeaderRequestActivity::class.java)
+                                        startActivity(intent)
+                                    }
+                                    else{
+
+                                        Toast.makeText(this@LoginActivity,"TODO",Toast.LENGTH_LONG).show()
+                                    }
+                                    transition.stopLoading()
+                                })
+
                             }
                         }
                     }
@@ -57,20 +76,15 @@ class LoginActivity : AppCompatActivity() {
                         Toast.makeText(this, "Please verify your email", Toast.LENGTH_LONG).show()
                     }
                     transition.stopLoading()
-                },
-                onFailure = { error ->
-                    Toast.makeText(this,error.message.toString(), Toast.LENGTH_LONG).show()
-                    transition.stopLoading()
                 })
-
 
             }
             else {
                 if(!emailValidation.IsValid ){
                     binding.EmailETL.error = emailValidation.ErrorMessage
                 }
-                if(!passwrodValidation.IsValid){
-                    binding.PasswordETL.error = passwrodValidation.ErrorMessage
+                if(!passwordValidation.IsValid){
+                    binding.PasswordETL.error = passwordValidation.ErrorMessage
                 }
             }
         }
