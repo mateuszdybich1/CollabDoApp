@@ -1,8 +1,14 @@
 package com.dybich.collabdoapp.Dtos
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+
+@Parcelize
 data class EmployeeDto (
-    val EmployeeId : String,
-    val LeaderRequestEmail : String,
-    val LeaderId : String
-) {
+    val employeeId : String?,
+    val leaderRequestEmail : String?,
+    val leaderId : String?
+) : Parcelable {
+
 }

@@ -3,13 +3,12 @@ package com.dybich.collabdoapp.login
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
-import com.dybich.collabdoapp.Keycloak.KeycloakToken
+import com.dybich.collabdoapp.API.EmployeeAPI
+import com.dybich.collabdoapp.API.KeycloakAPI
 import com.dybich.collabdoapp.API.UserAPI
 import com.dybich.collabdoapp.LeaderRequestActivity
 import com.dybich.collabdoapp.databinding.ActivityLoginBinding
-import kotlinx.coroutines.*
 
 class LoginActivity : AppCompatActivity() {
 
@@ -43,40 +42,67 @@ class LoginActivity : AppCompatActivity() {
 
                 transition.startLoading()
 
-                UserAPI.verifyEmail(email,this@LoginActivity, onSuccess = { isVerified ->
+                UserAPI.verifyEmail(email, onSuccess = { isVerified ->
 
                     if(isVerified){
+                        KeycloakAPI.getFromEmailAndPass(email,password,
+                            onSuccess = {keycloakTokenData ->
 
-                        CoroutineScope(Dispatchers.Main).launch {
+                                UserAPI.isUserLeader(keycloakTokenData.access_token,
+                                    onSuccess = { isLeader ->
 
-                            val tokenData = KeycloakToken.getFromEmailAndPass(email, password,this@LoginActivity)
+                                        if(!isLeader){
 
-                            if (tokenData != null) {
-                                Log.d("KEYCLOAK","Access Token: ${tokenData.AccessToken}")
-                                println("Refresh Token: ${tokenData.RefreshToken}")
+                                            EmployeeAPI.getEmployeeDto(keycloakTokenData.access_token,
+                                                onSuccess = {employeeDto ->
 
-                                UserAPI.isUserLeader(tokenData.AccessToken,this@LoginActivity,onSuccess = { isLeader ->
+                                                    if(employeeDto.leaderId=="" || employeeDto.leaderId=="null" || employeeDto.leaderId==null){
+                                                        val intent = Intent(this@LoginActivity, LeaderRequestActivity::class.java)
+                                                        intent.putExtra("email", email)
+                                                        intent.putExtra("password", password)
+                                                        intent.putExtra("employeeDto", employeeDto)
+                                                        startActivity(intent)
+                                                        transition.stopLoading()
+                                                    }
+                                                    else{
+                                                        Toast.makeText(this@LoginActivity, "TODO", Toast.LENGTH_LONG).show()
+                                                        transition.stopLoading()
+                                                    }
 
-                                    Log.d("ISLEADER",isLeader.toString())
-                                    if(!isLeader){
-                                        val intent = Intent(this@LoginActivity, LeaderRequestActivity::class.java)
-                                        startActivity(intent)
-                                    }
-                                    else{
+                                                },
+                                                onFailure = {error->
+                                                    Toast.makeText(this,error,Toast.LENGTH_LONG).show()
+                                                    transition.stopLoading()
+                                                })
 
-                                        Toast.makeText(this@LoginActivity,"TODO",Toast.LENGTH_LONG).show()
-                                    }
+                                        }
+                                        else{
+                                            Toast.makeText(this@LoginActivity, "TODO", Toast.LENGTH_LONG).show()
+                                            transition.stopLoading()
+                                        }
+
+                                }, onFailure = {error ->
+                                    Toast.makeText(this,error,Toast.LENGTH_LONG).show()
                                     transition.stopLoading()
                                 })
 
-                            }
-                        }
+
+
+                        }, onFailure = {error ->
+                            Toast.makeText(this,error,Toast.LENGTH_LONG).show()
+                            transition.stopLoading()
+                        })
+
                     }
                     else{
                         Toast.makeText(this, "Please verify your email", Toast.LENGTH_LONG).show()
+                        transition.stopLoading()
                     }
-                    transition.stopLoading()
-                })
+
+                }, onFailure = {error ->
+                    Toast.makeText(this@LoginActivity,error,Toast.LENGTH_LONG).show()
+                    transition.stopLoading()})
+
 
             }
             else {

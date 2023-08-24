@@ -1,6 +1,7 @@
 package com.dybich.collabdoapp.API
 
 import android.content.Context
+import android.hardware.camera2.CaptureFailure
 import android.widget.Toast
 import com.dybich.collabdoapp.Dtos.UserRegisterDto
 import com.dybich.collabdoapp.IRetrofitAPI.IUserAPI
@@ -9,6 +10,8 @@ import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 object UserAPI {
     private val baseUrl = "http://192.168.0.110:52000/api/"
@@ -21,8 +24,8 @@ object UserAPI {
 
     private val retrofitAPI = retrofit.create(IUserAPI::class.java)
     fun registerUser(userRegisterDto: UserRegisterDto,
-                     context: Context,
-                     onSuccess: (String) -> Unit){
+                     onSuccess: (String) -> Unit,
+                     onFailure: (String) -> Unit){
 
         val call = retrofitAPI.registerUser(userRegisterDto)
 
@@ -33,23 +36,22 @@ object UserAPI {
                     if (userId != null) {
                         onSuccess(userId)
                     } else {
-
-                        Toast.makeText(context,"Empty GUID",Toast.LENGTH_LONG).show()
+                        onFailure("Empty GUID")
                     }
                 } else {
-                    val errorBody = response.errorBody()?.string()
-                    Toast.makeText(context,errorBody,Toast.LENGTH_LONG).show()
+                    val errorBody = response.errorBody()!!.string()
+                    onFailure(errorBody)
                 }
             }
             override fun onFailure(call: Call<String>, t: Throwable) {
-                Toast.makeText(context,t.message.toString(),Toast.LENGTH_LONG).show()
+                onFailure(t.message.toString())
             }
         })
     }
 
     fun verifyEmail(email : String,
-                    context: Context,
-                    onSuccess: (Boolean) -> Unit) {
+                    onSuccess: (Boolean) -> Unit,
+                    onFailure: (String) -> Unit) {
 
 
         val call = retrofitAPI.verifyEmail(email)
@@ -61,47 +63,50 @@ object UserAPI {
                     if (isVerified != null) {
                         onSuccess(isVerified)
                     } else {
-                        Toast.makeText(context,"ERROR",Toast.LENGTH_LONG).show()
+                        onFailure("ERROR")
                     }
                 } else {
-                    val errorBody = response.errorBody()?.string()
-                    Toast.makeText(context,errorBody,Toast.LENGTH_LONG).show()
+                    val errorBody = response.errorBody()!!.string()
+                    onFailure(errorBody)
                 }
             }
 
             override fun onFailure(call: Call<Boolean>, t: Throwable) {
-                Toast.makeText(context,t.message.toString(),Toast.LENGTH_LONG).show()
+                onFailure(t.message.toString())
             }
 
         })
     }
 
-    fun isUserLeader(accessToken : String,
-                     context: Context,
-                     onSuccess: (Boolean) -> Unit){
+     fun isUserLeader(accessToken: String,
+                      onSuccess: (Boolean) -> Unit,
+                      onFailure: (String) -> Unit) {
 
 
-        val call = retrofitAPI.isUserLeader(accessToken)
+         val call = retrofitAPI.isUserLeader("Bearer $accessToken" )
 
-        call.enqueue(object : Callback<Boolean> {
-            override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
-                if (response.isSuccessful) {
-                    val isLeader = response.body()
-                    if (isLeader != null) {
-                        onSuccess(isLeader)
-                    } else {
-                        Toast.makeText(context,"ERROR",Toast.LENGTH_LONG).show()
-                    }
-                } else {
-                    val errorBody = response.errorBody()?.string()
-                    Toast.makeText(context,errorBody,Toast.LENGTH_LONG).show()
-                }
-            }
+         call.enqueue(object : Callback<Boolean> {
+             override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
+                 if (response.isSuccessful) {
+                     val isLeader = response.body()
+                     if (isLeader != null) {
+                         onSuccess(isLeader)
+                     } else {
+                         onFailure("ERROR")
+                     }
+                 }
+                 else if(response.code() == 401){
+                     onFailure("UNATHORIZED")
+                 }
+                 else {
+                     val errorBody = response.errorBody()!!.string()
+                     onFailure(errorBody)
+                 }
+             }
 
-            override fun onFailure(call: Call<Boolean>, t: Throwable) {
-                Toast.makeText(context,t.message.toString(),Toast.LENGTH_LONG).show()
-            }
-
-        })
+             override fun onFailure(call: Call<Boolean>, t: Throwable) {
+                 onFailure(t.message.toString())
+             }
+         })
     }
 }

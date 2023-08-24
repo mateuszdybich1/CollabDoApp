@@ -1,6 +1,6 @@
 package com.dybich.collabdoapp.Keycloak
 
-class KeycloakTokenData ( accessToken : String, refreshToken : String) {
-    val AccessToken = accessToken
-    val RefreshToken =refreshToken
+class KeycloakTokenData ( access_token : String, refresh_token : String) {
+    var access_token = access_token
+    var refresh_token =refresh_token
 }

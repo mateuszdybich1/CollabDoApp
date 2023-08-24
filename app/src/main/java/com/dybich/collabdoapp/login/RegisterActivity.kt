@@ -55,10 +55,10 @@ class RegisterActivity : AppCompatActivity() {
                 val registerObj = UserRegisterDto(username,email,password,isLeader)
 
                 UserAPI.registerUser(registerObj,
-                    this@RegisterActivity,
                     onSuccess = { userId ->
 
-                        UserAPI.verifyEmail(email,this@RegisterActivity,onSuccess = { isVerified ->
+                        UserAPI.verifyEmail(email,
+                            onSuccess = { isVerified ->
 
                             if(!isVerified){
                                 Toast.makeText(this, "Success! Sent verification email",Toast.LENGTH_LONG).show()
@@ -66,8 +66,15 @@ class RegisterActivity : AppCompatActivity() {
                                 startActivity(intent)
                             }
                             transition.stopLoading()
-                        })
-                    })
+                        }, onFailure = { error->
+                            Toast.makeText(this@RegisterActivity, error,Toast.LENGTH_LONG).show()
+
+                            transition.stopLoading()})
+
+                    }, onFailure = { error->
+                        Toast.makeText(this@RegisterActivity, error,Toast.LENGTH_LONG).show()
+
+                        transition.stopLoading()})
 
             }
             else{

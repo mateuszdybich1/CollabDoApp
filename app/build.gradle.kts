@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("kotlin-parcelize")
 }
 
 android {
@@ -20,6 +21,7 @@ android {
     buildFeatures{
         viewBinding = true
     }
+
 
     buildTypes {
         release {
@@ -55,11 +57,8 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
 
 
-    implementation ("com.squareup.okhttp3:okhttp:4.9.0")
-
-    implementation ("com.github.kittinunf.fuel:fuel:2.3.1")
-    implementation ("com.github.kittinunf.fuel:fuel-coroutines:2.3.1")
 
     implementation ("com.squareup.retrofit2:retrofit:2.9.0")
     implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation ("com.squareup.retrofit2:adapter-rxjava2:2.9.0")
 }
