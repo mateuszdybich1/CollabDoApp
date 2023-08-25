@@ -8,6 +8,7 @@ import com.dybich.collabdoapp.API.EmployeeAPI
 import com.dybich.collabdoapp.API.KeycloakAPI
 import com.dybich.collabdoapp.API.UserAPI
 import com.dybich.collabdoapp.LeaderRequestActivity
+import com.dybich.collabdoapp.LoggedInActivity
 import com.dybich.collabdoapp.databinding.ActivityLoginBinding
 
 class LoginActivity : AppCompatActivity() {
@@ -25,11 +26,12 @@ class LoginActivity : AppCompatActivity() {
         val emailErrorObj = ErrorObj(binding.EmailET, binding.EmailETL)
         val passErrorObj = ErrorObj(binding.PasswordET, binding.PasswordETL)
 
+        val transition = ButtonTransition(binding.loginLayout,binding.BtnTV, binding.LoadingCircle,binding.LoginBTN, this@LoginActivity)
+
         ClearErrors.clearErrors(listOf(emailErrorObj,passErrorObj))
 
         binding.LoginBTN.setOnClickListener(){
 
-            val transition = ButtonTransition(binding.loginLayout,binding.BtnTV, binding.LoadingCircle,binding.LoginBTN, this@LoginActivity)
 
             email = binding.EmailET.text.toString()
             password = binding.PasswordET.text.toString()
@@ -62,10 +64,16 @@ class LoginActivity : AppCompatActivity() {
                                                         intent.putExtra("password", password)
                                                         intent.putExtra("employeeDto", employeeDto)
                                                         startActivity(intent)
+
                                                         transition.stopLoading()
                                                     }
                                                     else{
-                                                        Toast.makeText(this@LoginActivity, "TODO", Toast.LENGTH_LONG).show()
+                                                        val intent = Intent(this@LoginActivity, LoggedInActivity::class.java)
+                                                        intent.putExtra("email", email)
+                                                        intent.putExtra("password", password)
+                                                        intent.putExtra("leaderId", employeeDto.leaderId)
+                                                        startActivity(intent)
+
                                                         transition.stopLoading()
                                                     }
 
@@ -77,7 +85,11 @@ class LoginActivity : AppCompatActivity() {
 
                                         }
                                         else{
-                                            Toast.makeText(this@LoginActivity, "TODO", Toast.LENGTH_LONG).show()
+                                            val intent = Intent(this@LoginActivity, LoggedInActivity::class.java)
+                                            intent.putExtra("email", email)
+                                            intent.putExtra("password", password)
+                                            startActivity(intent)
+
                                             transition.stopLoading()
                                         }
 

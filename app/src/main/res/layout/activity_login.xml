@@ -36,7 +36,7 @@
 
 
             <com.google.android.material.card.MaterialCardView
-                    android:paddingLeft="30dp"
+
                     app:cardCornerRadius="50dp"
                     app:strokeWidth="0dp"
                     app:cardBackgroundColor="@color/secondaryBlue"
