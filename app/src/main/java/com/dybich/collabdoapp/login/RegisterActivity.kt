@@ -4,8 +4,10 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
+import com.dybich.collabdoapp.API.KeycloakAPI
 import com.dybich.collabdoapp.Dtos.UserRegisterDto
 import com.dybich.collabdoapp.API.UserAPI
+import com.dybich.collabdoapp.ButtonTransition
 import com.dybich.collabdoapp.databinding.ActivityRegisterBinding
 
 class RegisterActivity : AppCompatActivity() {
@@ -31,6 +33,10 @@ class RegisterActivity : AppCompatActivity() {
 
         ClearErrors.clearErrors(listOf(usernameErrorObj,emailErrorObj,passErrorObj,repPassErrorObj))
 
+
+        val userAPI = UserAPI()
+        val keycloakAPI = KeycloakAPI()
+
         binding.RegisterBTN.setOnClickListener(){
 
 
@@ -54,22 +60,33 @@ class RegisterActivity : AppCompatActivity() {
 
                 val registerObj = UserRegisterDto(username,email,password,isLeader)
 
-                UserAPI.registerUser(registerObj,
+                userAPI.registerUser(registerObj,
                     onSuccess = { userId ->
 
-                        UserAPI.verifyEmail(email,
-                            onSuccess = { isVerified ->
+                        keycloakAPI.getFromEmailAndPass(email,password,
+                            onSuccess = { keycloakTokenData ->
 
-                            if(!isVerified){
-                                Toast.makeText(this, "Success! Sent verification email",Toast.LENGTH_LONG).show()
-                                val intent = Intent(this, LoginActivity::class.java)
-                                startActivity(intent)
-                            }
-                            transition.stopLoading()
-                        }, onFailure = { error->
-                            Toast.makeText(this@RegisterActivity, error,Toast.LENGTH_LONG).show()
+                                userAPI.verifyEmail(keycloakTokenData.access_token,
+                                    onSuccess = { isVerified ->
 
-                            transition.stopLoading()})
+                                        if(!isVerified){
+                                            Toast.makeText(this, "Success! Sent verification email",Toast.LENGTH_LONG).show()
+                                            val intent = Intent(this, LoginActivity::class.java)
+                                            startActivity(intent)
+                                        }
+                                        transition.stopLoading()
+                                    }, onFailure = { error->
+                                        Toast.makeText(this@RegisterActivity, error,Toast.LENGTH_LONG).show()
+
+                                        transition.stopLoading()})
+
+                            },
+                            onFailure = {error->
+                                Toast.makeText(this@RegisterActivity, error,Toast.LENGTH_LONG).show()
+
+                                transition.stopLoading()
+                            } )
+
 
                     }, onFailure = { error->
                         Toast.makeText(this@RegisterActivity, error,Toast.LENGTH_LONG).show()

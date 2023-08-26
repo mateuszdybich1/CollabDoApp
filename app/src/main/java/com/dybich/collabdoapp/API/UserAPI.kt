@@ -13,7 +13,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-object UserAPI {
+class UserAPI () {
     private val baseUrl = "http://192.168.0.110:52000/api/"
 
     private val retrofit = Retrofit.Builder()
@@ -49,12 +49,12 @@ object UserAPI {
         })
     }
 
-    fun verifyEmail(email : String,
+    fun verifyEmail(accessToken : String,
                     onSuccess: (Boolean) -> Unit,
                     onFailure: (String) -> Unit) {
 
 
-        val call = retrofitAPI.verifyEmail(email)
+        val call = retrofitAPI.verifyEmail("Bearer $accessToken")
 
         call.enqueue(object : Callback<Boolean> {
             override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
@@ -62,6 +62,35 @@ object UserAPI {
                     val isVerified = response.body()
                     if (isVerified != null) {
                         onSuccess(isVerified)
+                    } else {
+                        onFailure("ERROR")
+                    }
+                } else {
+                    val errorBody = response.errorBody()!!.string()
+                    onFailure(errorBody)
+                }
+            }
+
+            override fun onFailure(call: Call<Boolean>, t: Throwable) {
+                onFailure(t.message.toString())
+            }
+
+        })
+    }
+
+    fun resetPassword(userEmail : String,
+                    onSuccess: (String) -> Unit,
+                    onFailure: (String) -> Unit) {
+
+
+        val call = retrofitAPI.resetPassword(userEmail)
+
+        call.enqueue(object : Callback<Boolean> {
+            override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
+                if (response.isSuccessful) {
+                    val message = response.body()
+                    if (message != null) {
+                        onSuccess("Sent successfully")
                     } else {
                         onFailure("ERROR")
                     }

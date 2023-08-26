@@ -11,7 +11,7 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-object ProjectAPI {
+class ProjectAPI () {
     private val baseUrl = "http://192.168.0.110:52000/api/"
 
     private val retrofit = Retrofit.Builder()

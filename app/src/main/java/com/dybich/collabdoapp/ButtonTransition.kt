@@ -1,4 +1,4 @@
-package com.dybich.collabdoapp.login
+package com.dybich.collabdoapp
 
 import android.content.Context
 import android.view.View
@@ -10,7 +10,6 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.content.res.AppCompatResources.getColorStateList
 import androidx.constraintlayout.widget.ConstraintLayout
-import com.dybich.collabdoapp.R
 
 class ButtonTransition(
     private val layout : ConstraintLayout,

@@ -3,6 +3,7 @@ package com.dybich.collabdoapp.API
 import android.util.Log
 import com.dybich.collabdoapp.IRetrofitAPI.IKeycloakAPI
 import com.dybich.collabdoapp.Keycloak.KeycloakConfig
+import com.dybich.collabdoapp.Keycloak.KeycloakError
 import com.dybich.collabdoapp.Keycloak.KeycloakTokenData
 import com.google.gson.GsonBuilder
 import retrofit2.Call
@@ -12,15 +13,15 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 
-object KeycloakAPI {
+class KeycloakAPI () {
 
-    private const val keycloakBaseUrl = KeycloakConfig.ServerAddress
-    private const val realm = KeycloakConfig.Realm
+    private  val keycloakBaseUrl = KeycloakConfig.ServerAddress
+    private  val realm = KeycloakConfig.Realm
 
-    private const val clientId =KeycloakConfig.ClientId
-    private const val cientCecret = KeycloakConfig.ClientSecret
+    private  val clientId =KeycloakConfig.ClientId
+    private  val cientSecret = KeycloakConfig.ClientSecret
 
-    private const val baseUrl = "$keycloakBaseUrl/auth/realms/$realm/protocol/openid-connect/"
+    private  val baseUrl = "$keycloakBaseUrl/auth/realms/$realm/protocol/openid-connect/"
 
     private val retrofit = Retrofit.Builder()
         .baseUrl(baseUrl)
@@ -40,7 +41,7 @@ object KeycloakAPI {
 
     {
 
-        val call = retrofitAPI.getFromEmailAndPass("password", clientId, cientCecret, email,password)
+        val call = retrofitAPI.getFromEmailAndPass("password", clientId, cientSecret, email,password)
 
         call.enqueue(object : Callback<KeycloakTokenData> {
             override fun onResponse(call: Call<KeycloakTokenData>, response: Response<KeycloakTokenData>) {
@@ -51,12 +52,22 @@ object KeycloakAPI {
                         val refreshToken = keycloakData.refresh_token
                         onSuccess(KeycloakTokenData(accessToken, refreshToken))
 
-                    } else {
+                    }
+                    else {
                         onFailure("TOKEN ERROR")
                     }
-                } else {
-                    val errorBody = response.errorBody()!!.string()
-                    onFailure(errorBody)
+                }
+                else {
+                    val errorBody = response.errorBody()!!
+                    try {
+                        val keycloakError = retrofit.responseBodyConverter<KeycloakError>(
+                            KeycloakError::class.java,
+                            arrayOfNulls(0)
+                        ).convert(errorBody)
+                        onFailure(keycloakError!!.error_description!!)
+                    } catch (e: Exception) {
+                        onFailure(e.message.toString())
+                    }
                 }
             }
 
@@ -75,7 +86,7 @@ object KeycloakAPI {
 
     {
 
-        val call = retrofitAPI.getFromRefreshToken("password", clientId, cientCecret, refreshToken)
+        val call = retrofitAPI.getFromRefreshToken("refresh_token", clientId, cientSecret, refreshToken)
 
         call.enqueue(object : Callback<KeycloakTokenData> {
             override fun onResponse(call: Call<KeycloakTokenData>, response: Response<KeycloakTokenData>) {
@@ -89,9 +100,18 @@ object KeycloakAPI {
                     } else {
                         onFailure("TOKEN ERROR")
                     }
-                } else {
-                    val errorBody = response.errorBody()!!.string()
-                    onFailure(errorBody)
+                }
+                else {
+                    val errorBody = response.errorBody()!!
+                    try {
+                        val keycloakError = retrofit.responseBodyConverter<KeycloakError>(
+                            KeycloakError::class.java,
+                            arrayOfNulls(0)
+                        ).convert(errorBody)
+                        onFailure(keycloakError!!.error_description!!)
+                    } catch (e: Exception) {
+                        onFailure(e.message.toString())
+                    }
                 }
             }
 

@@ -8,7 +8,7 @@ import kotlinx.parcelize.Parcelize
 data class EmployeeDto (
     val employeeId : String?,
     val leaderRequestEmail : String?,
-    val leaderId : String?
+    var leaderId : String?
 ) : Parcelable {
 
 }

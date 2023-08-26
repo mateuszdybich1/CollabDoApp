@@ -10,7 +10,7 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-object EmployeeAPI {
+class EmployeeAPI () {
 
     private val baseUrl = "http://192.168.0.110:52000/api/"
 
@@ -53,5 +53,41 @@ object EmployeeAPI {
         })
 
     }
+
+
+    fun createRequest(accessToken : String,
+                      leaderEmail : String,
+                      onSuccess: (String) -> Unit,
+                      onFailure : (String) -> Unit){
+
+        val call = retrofitAPI.createRequest("Bearer $accessToken",leaderEmail)
+
+        call.enqueue(object : Callback<String>{
+            override fun onResponse(call: Call<String>, response: Response<String>) {
+                if (response.isSuccessful) {
+                    val requestId = response.body()
+                    if (requestId != null) {
+                        onSuccess(requestId)
+                    } else {
+                        onFailure("ERROR")
+                    }
+                }
+                else if(response.code() == 401){
+                    onFailure("UNATHORIZED")
+                }
+                else {
+                    val errorBody = response.errorBody()!!.string()
+                    onFailure(errorBody)
+                }
+            }
+
+            override fun onFailure(call: Call<String>, t: Throwable) {
+                onFailure(t.message.toString())
+            }
+        })
+
+    }
+
+
 
 }

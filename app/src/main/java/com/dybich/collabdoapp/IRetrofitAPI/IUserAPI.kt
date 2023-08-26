@@ -11,7 +11,10 @@ interface IUserAPI {
 
 
     @PUT("user/verify")
-    fun verifyEmail(@Body email : String) : Call<Boolean>
+    fun verifyEmail(@Header("Authorization") token: String) : Call<Boolean>
+
+    @PUT("user/password")
+    fun resetPassword(@Body userEmail: String) : Call<Boolean>
 
     @GET("user")
     fun isUserLeader(@Header("Authorization") token: String) : Call<Boolean>

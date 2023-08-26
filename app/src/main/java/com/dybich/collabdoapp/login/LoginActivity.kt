@@ -7,6 +7,7 @@ import android.widget.Toast
 import com.dybich.collabdoapp.API.EmployeeAPI
 import com.dybich.collabdoapp.API.KeycloakAPI
 import com.dybich.collabdoapp.API.UserAPI
+import com.dybich.collabdoapp.ButtonTransition
 import com.dybich.collabdoapp.LeaderRequestActivity
 import com.dybich.collabdoapp.LoggedInActivity
 import com.dybich.collabdoapp.databinding.ActivityLoginBinding
@@ -26,9 +27,14 @@ class LoginActivity : AppCompatActivity() {
         val emailErrorObj = ErrorObj(binding.EmailET, binding.EmailETL)
         val passErrorObj = ErrorObj(binding.PasswordET, binding.PasswordETL)
 
+        ClearErrors.clearErrors(listOf(emailErrorObj,passErrorObj))
+
         val transition = ButtonTransition(binding.loginLayout,binding.BtnTV, binding.LoadingCircle,binding.LoginBTN, this@LoginActivity)
 
-        ClearErrors.clearErrors(listOf(emailErrorObj,passErrorObj))
+
+        val employeeAPI = EmployeeAPI()
+        val keycloakAPI = KeycloakAPI()
+        val userAPI = UserAPI()
 
         binding.LoginBTN.setOnClickListener(){
 
@@ -44,76 +50,83 @@ class LoginActivity : AppCompatActivity() {
 
                 transition.startLoading()
 
-                UserAPI.verifyEmail(email, onSuccess = { isVerified ->
+                keycloakAPI.getFromEmailAndPass(email,password,
+                    onSuccess = {keycloakTokenData ->
 
-                    if(isVerified){
-                        KeycloakAPI.getFromEmailAndPass(email,password,
-                            onSuccess = {keycloakTokenData ->
+                        userAPI.verifyEmail(keycloakTokenData.access_token,
+                            onSuccess = { isVerified ->
 
-                                UserAPI.isUserLeader(keycloakTokenData.access_token,
-                                    onSuccess = { isLeader ->
+                                if(isVerified){
 
-                                        if(!isLeader){
+                                    userAPI.isUserLeader(keycloakTokenData.access_token,
+                                        onSuccess = { isLeader ->
 
-                                            EmployeeAPI.getEmployeeDto(keycloakTokenData.access_token,
-                                                onSuccess = {employeeDto ->
+                                            if(!isLeader){
 
-                                                    if(employeeDto.leaderId=="" || employeeDto.leaderId=="null" || employeeDto.leaderId==null){
-                                                        val intent = Intent(this@LoginActivity, LeaderRequestActivity::class.java)
-                                                        intent.putExtra("email", email)
-                                                        intent.putExtra("password", password)
-                                                        intent.putExtra("employeeDto", employeeDto)
-                                                        startActivity(intent)
+                                                employeeAPI.getEmployeeDto(keycloakTokenData.access_token,
+                                                    onSuccess = {employeeDto ->
 
+                                                        if(employeeDto.leaderId=="" || employeeDto.leaderId=="null" || employeeDto.leaderId==null){
+                                                            val intent = Intent(this@LoginActivity, LeaderRequestActivity::class.java)
+                                                            intent.putExtra("email", email)
+                                                            intent.putExtra("password", password)
+                                                            intent.putExtra("employeeDto", employeeDto)
+                                                            intent.putExtra("refreshToken", keycloakTokenData.refresh_token)
+                                                            startActivity(intent)
+
+                                                            transition.stopLoading()
+                                                        }
+                                                        else{
+                                                            val intent = Intent(this@LoginActivity, LoggedInActivity::class.java)
+                                                            intent.putExtra("email", email)
+                                                            intent.putExtra("password", password)
+                                                            intent.putExtra("leaderId", employeeDto.leaderId)
+                                                            startActivity(intent)
+
+                                                            transition.stopLoading()
+                                                        }
+
+                                                    },
+                                                    onFailure = {error->
+                                                        Toast.makeText(this,error,Toast.LENGTH_LONG).show()
                                                         transition.stopLoading()
-                                                    }
-                                                    else{
-                                                        val intent = Intent(this@LoginActivity, LoggedInActivity::class.java)
-                                                        intent.putExtra("email", email)
-                                                        intent.putExtra("password", password)
-                                                        intent.putExtra("leaderId", employeeDto.leaderId)
-                                                        startActivity(intent)
+                                                    })
 
-                                                        transition.stopLoading()
-                                                    }
+                                            }
+                                            else{
+                                                val intent = Intent(this@LoginActivity, LoggedInActivity::class.java)
+                                                intent.putExtra("email", email)
+                                                intent.putExtra("password", password)
+                                                startActivity(intent)
 
-                                                },
-                                                onFailure = {error->
-                                                    Toast.makeText(this,error,Toast.LENGTH_LONG).show()
-                                                    transition.stopLoading()
-                                                })
+                                                transition.stopLoading()
+                                            }
 
-                                        }
-                                        else{
-                                            val intent = Intent(this@LoginActivity, LoggedInActivity::class.java)
-                                            intent.putExtra("email", email)
-                                            intent.putExtra("password", password)
-                                            startActivity(intent)
-
+                                        }, onFailure = {error ->
+                                            Toast.makeText(this,error,Toast.LENGTH_LONG).show()
                                             transition.stopLoading()
-                                        }
+                                        })
 
-                                }, onFailure = {error ->
-                                    Toast.makeText(this,error,Toast.LENGTH_LONG).show()
+
+
+
+
+                                }
+                                else{
+                                    Toast.makeText(this, "Please verify your email", Toast.LENGTH_LONG).show()
                                     transition.stopLoading()
-                                })
+                                }
 
+                            }, onFailure = {error ->
+                            Toast.makeText(this@LoginActivity,error,Toast.LENGTH_LONG).show()
+                            transition.stopLoading()})
 
-
-                        }, onFailure = {error ->
-                            Toast.makeText(this,error,Toast.LENGTH_LONG).show()
-                            transition.stopLoading()
-                        })
-
-                    }
-                    else{
-                        Toast.makeText(this, "Please verify your email", Toast.LENGTH_LONG).show()
+                    }, onFailure = {error ->
+                        Toast.makeText(this,error,Toast.LENGTH_LONG).show()
                         transition.stopLoading()
-                    }
+                    })
 
-                }, onFailure = {error ->
-                    Toast.makeText(this@LoginActivity,error,Toast.LENGTH_LONG).show()
-                    transition.stopLoading()})
+
 
 
             }
@@ -127,7 +140,10 @@ class LoginActivity : AppCompatActivity() {
             }
         }
 
-        binding.ForgotPassTV.setOnClickListener(){}
+        binding.ForgotPassTV.setOnClickListener(){
+            val intent = Intent(this, ResetPasswordActivity::class.java)
+            startActivity(intent)
+        }
 
 
         binding.SignUpTV.setOnClickListener(){
