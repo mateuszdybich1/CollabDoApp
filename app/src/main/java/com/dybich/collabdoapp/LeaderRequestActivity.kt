@@ -12,6 +12,8 @@ import com.dybich.collabdoapp.API.UserAPI
 import com.dybich.collabdoapp.Dtos.EmployeeDto
 import com.dybich.collabdoapp.Keycloak.KeycloakTokenData
 import com.dybich.collabdoapp.databinding.ActivityLeaderRequestBinding
+import com.dybich.collabdoapp.login.ClearErrors
+import com.dybich.collabdoapp.login.ErrorObj
 import com.dybich.collabdoapp.login.Validation
 
 class LeaderRequestActivity : AppCompatActivity() {
@@ -31,6 +33,9 @@ class LeaderRequestActivity : AppCompatActivity() {
 
         val employeeDto : EmployeeDto? = intent.getParcelableExtra("employeeDto")
 
+        val emailErrorObj = ErrorObj(binding.EmailET, binding.EmailETL)
+
+        ClearErrors.clearErrors(listOf(emailErrorObj))
 
 
         val transition = ButtonTransition(
@@ -42,7 +47,7 @@ class LeaderRequestActivity : AppCompatActivity() {
 
 
         if(employeeDto?.leaderRequestEmail !="" && employeeDto?.leaderRequestEmail != null ){
-            updateLayout(binding, employeeDto.leaderRequestEmail)
+            updateLayout(binding, employeeDto.leaderRequestEmail!!)
         }
 
 
@@ -66,11 +71,11 @@ class LeaderRequestActivity : AppCompatActivity() {
                         onSuccess = {data ->
                             refreshToken = data.refresh_token
 
-                            employeeAPI.createRequest(data.access_token, binding.EmailET.text.toString(),
-                                onSuccess = {requestId ->
-                                    Toast.makeText(this@LeaderRequestActivity, "Request created",Toast.LENGTH_LONG).show()
-                                    updateLayout(binding, binding.EmailET.text.toString())
-                                    employeeDto?.leaderId = binding.EmailET.text.toString()
+                            employeeAPI.deleteRequest(data.access_token, binding.EmailET.text.toString(),
+                                onSuccess = {employeeid ->
+                                    Toast.makeText(this@LeaderRequestActivity, "Request deleted",Toast.LENGTH_LONG).show()
+                                    resetLayout(binding)
+                                    employeeDto?.leaderRequestEmail = ""
                                     transition.stopLoading()
                                 },
                                 onFailure = {error->
@@ -85,11 +90,11 @@ class LeaderRequestActivity : AppCompatActivity() {
 
                                         refreshToken = data.refresh_token
 
-                                        employeeAPI.createRequest(data.access_token, binding.EmailET.text.toString(),
+                                        employeeAPI.deleteRequest(data.access_token, binding.EmailET.text.toString(),
                                             onSuccess = {requestId ->
-                                                Toast.makeText(this@LeaderRequestActivity, "Request created",Toast.LENGTH_LONG).show()
-                                                updateLayout(binding, binding.EmailET.text.toString())
-                                                employeeDto?.leaderId = binding.EmailET.text.toString()
+                                                Toast.makeText(this@LeaderRequestActivity, "Request deleted",Toast.LENGTH_LONG).show()
+                                                resetLayout(binding)
+                                                employeeDto?.leaderRequestEmail = ""
                                                 transition.stopLoading()
                                             },
                                             onFailure = {error->
@@ -122,7 +127,8 @@ class LeaderRequestActivity : AppCompatActivity() {
                                 onSuccess = {requestId ->
                                     Toast.makeText(this@LeaderRequestActivity, "Request created",Toast.LENGTH_LONG).show()
                                     updateLayout(binding, binding.EmailET.text.toString())
-                                    employeeDto?.leaderId = binding.EmailET.text.toString()
+
+                                    employeeDto?.leaderRequestEmail = binding.EmailET.text.toString()
                                     transition.stopLoading()
                                 },
                                 onFailure = {error->
@@ -141,7 +147,7 @@ class LeaderRequestActivity : AppCompatActivity() {
                                             onSuccess = {requestId ->
                                                 Toast.makeText(this@LeaderRequestActivity, "Request created",Toast.LENGTH_LONG).show()
                                                 updateLayout(binding, binding.EmailET.text.toString())
-                                                employeeDto?.leaderId = binding.EmailET.text.toString()
+                                                employeeDto?.leaderRequestEmail = binding.EmailET.text.toString()
                                                 transition.stopLoading()
                                             },
                                             onFailure = {error->
@@ -178,6 +184,12 @@ class LeaderRequestActivity : AppCompatActivity() {
         binding.BtnTV.text = "Cancel request"
     }
 
+    private fun resetLayout( binding: ActivityLeaderRequestBinding){
+        binding.EmailETL.isEnabled = true
+        binding.EmailETL.isHelperTextEnabled = false
+        binding.EmailET.setText("")
+        binding.BtnTV.text = "Send request"
+    }
     private var doubleBackToExitPressedOnce = false
     override fun onBackPressed() {
         if (doubleBackToExitPressedOnce) {

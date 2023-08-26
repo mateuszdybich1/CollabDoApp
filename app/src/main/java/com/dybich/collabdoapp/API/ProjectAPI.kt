@@ -48,7 +48,15 @@ class ProjectAPI () {
                 }
             }
             override fun onFailure(call: Call<List<ProjectDto>>, t: Throwable) {
-                onFailure(t.message.toString())
+                if(t.message.toString().contains("Failed to connect")){
+                    onFailure("No internet connection")
+                }
+                else if(t.message.toString().contains("failed to connect")){
+                    onFailure("Server error")
+                }
+                else{
+                    onFailure(t.message.toString())
+                }
             }
         })
 

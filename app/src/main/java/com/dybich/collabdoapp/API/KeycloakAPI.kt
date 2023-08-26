@@ -64,7 +64,12 @@ class KeycloakAPI () {
                             KeycloakError::class.java,
                             arrayOfNulls(0)
                         ).convert(errorBody)
-                        onFailure(keycloakError!!.error_description!!)
+                        if(keycloakError!!.error_description!!.contains("Invalid user credentials")){
+                            onFailure("Password or email is incorrect")
+                        }
+                        else{
+                            onFailure(keycloakError!!.error_description!!)
+                        }
                     } catch (e: Exception) {
                         onFailure(e.message.toString())
                     }
@@ -72,8 +77,17 @@ class KeycloakAPI () {
             }
 
             override fun onFailure(call: Call<KeycloakTokenData>, t: Throwable) {
-                Log.d("ERROR", t.message.toString())
-                onFailure(t.message.toString())
+
+                if(t.message.toString().contains("Failed to connect")){
+                    onFailure("No internet connection")
+                }
+                else if(t.message.toString().contains("failed to connect")){
+                    onFailure("Server error")
+                }
+                else{
+                    onFailure(t.message.toString())
+                }
+
             }
         })
 
@@ -109,6 +123,7 @@ class KeycloakAPI () {
                             arrayOfNulls(0)
                         ).convert(errorBody)
                         onFailure(keycloakError!!.error_description!!)
+
                     } catch (e: Exception) {
                         onFailure(e.message.toString())
                     }
@@ -116,8 +131,15 @@ class KeycloakAPI () {
             }
 
             override fun onFailure(call: Call<KeycloakTokenData>, t: Throwable) {
-                Log.d("ERROR", t.message.toString())
-                onFailure(t.message.toString())
+                if(t.message.toString().contains("Failed to connect")){
+                    onFailure("No internet connection")
+                }
+                else if(t.message.toString().contains("failed to connect")){
+                    onFailure("Server error")
+                }
+                else{
+                    onFailure(t.message.toString())
+                }
             }
         })
 

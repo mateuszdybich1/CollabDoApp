@@ -44,7 +44,15 @@ class UserAPI () {
                 }
             }
             override fun onFailure(call: Call<String>, t: Throwable) {
-                onFailure(t.message.toString())
+                if(t.message.toString().contains("Failed to connect")){
+                    onFailure("No internet connection")
+                }
+                else if(t.message.toString().contains("failed to connect")){
+                    onFailure("Server error")
+                }
+                else{
+                    onFailure(t.message.toString())
+                }
             }
         })
     }
@@ -72,7 +80,15 @@ class UserAPI () {
             }
 
             override fun onFailure(call: Call<Boolean>, t: Throwable) {
-                onFailure(t.message.toString())
+                if(t.message.toString().contains("Failed to connect")){
+                    onFailure("No internet connection")
+                }
+                else if(t.message.toString().contains("failed to connect")){
+                    onFailure("Server error")
+                }
+                else{
+                    onFailure(t.message.toString())
+                }
             }
 
         })
@@ -101,7 +117,15 @@ class UserAPI () {
             }
 
             override fun onFailure(call: Call<Boolean>, t: Throwable) {
-                onFailure(t.message.toString())
+                if(t.message.toString().contains("Failed to connect")){
+                    onFailure("No internet connection")
+                }
+                else if(t.message.toString().contains("failed to connect")){
+                    onFailure("Server error")
+                }
+                else{
+                    onFailure(t.message.toString())
+                }
             }
 
         })
@@ -134,7 +158,15 @@ class UserAPI () {
              }
 
              override fun onFailure(call: Call<Boolean>, t: Throwable) {
-                 onFailure(t.message.toString())
+                 if(t.message.toString().contains("Failed to connect")){
+                     onFailure("No internet connection")
+                 }
+                 else if(t.message.toString().contains("failed to connect")){
+                     onFailure("Server error")
+                 }
+                 else{
+                     onFailure(t.message.toString())
+                 }
              }
          })
     }
