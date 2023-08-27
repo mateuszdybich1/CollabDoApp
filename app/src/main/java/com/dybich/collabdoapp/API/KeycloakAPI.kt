@@ -90,8 +90,6 @@ class KeycloakAPI () {
 
             }
         })
-
-
     }
 
     fun getFromRefreshToken(refreshToken : String,

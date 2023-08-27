@@ -12,7 +12,7 @@ object Validation {
             return  ValidationResponse(false,"Email must contain @")
         }
         else if(!email.matches(Regex("[A-Za-z0-9._%+-]+@uekat\\.pl$"))){
-            return  ValidationResponse(false,"Email mus end with uekat.pl")
+            return  ValidationResponse(false,"Email must end with uekat.pl")
         }
         else{
             return  ValidationResponse(true,"")

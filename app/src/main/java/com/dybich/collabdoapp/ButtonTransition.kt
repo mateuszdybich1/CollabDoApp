@@ -10,10 +10,10 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.content.res.AppCompatResources.getColorStateList
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 
 class ButtonTransition(
     private val layout : ConstraintLayout,
-    private val button_TV : TextView,
     private val progressBar: ProgressBar,
     private val button : Button,
     context : Context
@@ -22,6 +22,9 @@ class ButtonTransition(
     private val fadeIN = AnimationUtils.loadAnimation(context, com.google.android.material.R.anim.abc_fade_in)
     private val fadeOUT = AnimationUtils.loadAnimation(context, com.google.android.material.R.anim.abc_fade_out)
 
+    private val transparentColor = ContextCompat.getColor(context, R.color.color_transparent_100)
+    private val whiteColor = ContextCompat.getColor(context, R.color.secondaryBlue)
+
     val unclickedColor = getColorStateList(context,R.color.white)
     val clickedColor = getColorStateList(context,R.color.mainBlue)
 
@@ -29,12 +32,10 @@ class ButtonTransition(
 
         disableChildrenInputs(layout)
 
-        button.backgroundTintList = clickedColor
+
         button.startAnimation(fadeOUT)
 
-
-        button_TV.startAnimation(fadeOUT)
-        button_TV.visibility = View.GONE
+        button.setTextColor(transparentColor)
 
         progressBar.startAnimation(fadeIN)
         progressBar.visibility = View.VISIBLE
@@ -45,10 +46,9 @@ class ButtonTransition(
         progressBar.visibility = View.GONE
         progressBar.startAnimation(fadeOUT)
 
-        button_TV.visibility = View.VISIBLE
-        button_TV.startAnimation(fadeIN)
 
-        button.backgroundTintList = unclickedColor
+        button.setTextColor(whiteColor)
+
         button.startAnimation(fadeIN)
 
         enableChildrenInputs(layout)

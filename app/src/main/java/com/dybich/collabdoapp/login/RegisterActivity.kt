@@ -21,7 +21,6 @@ class RegisterActivity : AppCompatActivity() {
 
         val transition = ButtonTransition(
             binding.registerLayout,
-            binding.RegisterBTN,
             binding.RegisterPB,
             binding.RegisterBTN,
             this@RegisterActivity)

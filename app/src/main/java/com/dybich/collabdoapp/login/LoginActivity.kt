@@ -29,7 +29,7 @@ class LoginActivity : AppCompatActivity() {
 
         ClearErrors.clearErrors(listOf(emailErrorObj,passErrorObj))
 
-        val transition = ButtonTransition(binding.loginLayout,binding.BtnTV, binding.LoadingCircle,binding.LoginBTN, this@LoginActivity)
+        val transition = ButtonTransition(binding.loginLayout,binding.LoadingCircle,binding.LoginBTN, this@LoginActivity)
 
 
         val employeeAPI = EmployeeAPI()
@@ -106,9 +106,6 @@ class LoginActivity : AppCompatActivity() {
                                             Toast.makeText(this,error,Toast.LENGTH_LONG).show()
                                             transition.stopLoading()
                                         })
-
-
-
 
 
                                 }

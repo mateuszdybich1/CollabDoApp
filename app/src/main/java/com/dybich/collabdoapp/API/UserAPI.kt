@@ -14,7 +14,7 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 class UserAPI () {
-    private val baseUrl = "http://192.168.0.110:52000/api/"
+    private val baseUrl = ApiBaseUrl.baseUrl
 
     private val retrofit = Retrofit.Builder()
         .baseUrl(baseUrl)

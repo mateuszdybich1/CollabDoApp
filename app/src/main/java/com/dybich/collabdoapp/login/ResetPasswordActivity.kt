@@ -21,7 +21,7 @@ class ResetPasswordActivity : AppCompatActivity() {
 
         ClearErrors.clearErrors(listOf(emailErrorObj))
 
-        val transition = ButtonTransition(binding.resetPasswordLayout,binding.BtnTV, binding.LoadingCircle,binding.ResetPassword, this@ResetPasswordActivity)
+        val transition = ButtonTransition(binding.ResetPasswordLayout, binding.LoadingCircle,binding.ResetPassword, this@ResetPasswordActivity)
 
 
         val userAPI = UserAPI()
