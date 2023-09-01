@@ -20,13 +20,13 @@ class LeaderAPI {
     private val retrofitAPI = retrofit.create(ILeaderAPI::class.java)
 
     fun getEmployeesRequests(accessToken : String,
-                     onSuccess: (List<EmployeeRequestDto>?) -> Unit,
+                     onSuccess: (ArrayList<EmployeeRequestDto>?) -> Unit,
                      onFailure: (String) -> Unit)
     {
         val call = retrofitAPI.getEmployeesRequests("Bearer $accessToken")
 
-        call.enqueue(object : Callback<List<EmployeeRequestDto>?> {
-            override fun onResponse(call: Call<List<EmployeeRequestDto>?>, response: Response<List<EmployeeRequestDto>?>) {
+        call.enqueue(object : Callback<ArrayList<EmployeeRequestDto>?> {
+            override fun onResponse(call: Call<ArrayList<EmployeeRequestDto>?>, response: Response<ArrayList<EmployeeRequestDto>?>) {
                 if (response.isSuccessful) {
                     val list = response.body()
                     onSuccess(list)
@@ -36,7 +36,7 @@ class LeaderAPI {
                 }
             }
 
-            override fun onFailure(call: Call<List<EmployeeRequestDto>?>, t: Throwable) {
+            override fun onFailure(call: Call<ArrayList<EmployeeRequestDto>?>, t: Throwable) {
                 if(t.message.toString().contains("Failed to connect")){
                     onFailure("No internet connection")
                 }
@@ -51,11 +51,11 @@ class LeaderAPI {
         })
     }
     fun acceptRequest(accessToken : String,
-                      employeeRequestDto: EmployeeRequestDto,
+                      requestId:String,
                       onSuccess: (String) -> Unit,
                       onFailure: (String) -> Unit)
     {
-        val call = retrofitAPI.acceptEmployeeRequest("Bearer $accessToken",employeeRequestDto)
+        val call = retrofitAPI.acceptEmployeeRequest("Bearer $accessToken",requestId)
 
         call.enqueue(object : Callback<String> {
             override fun onResponse(call: Call<String>, response: Response<String>) {
@@ -89,11 +89,11 @@ class LeaderAPI {
     }
 
     fun deleteRequest(accessToken : String,
-                      employeeRequestDto: EmployeeRequestDto,
+                      requestId:String,
                       onSuccess: (String) -> Unit,
                       onFailure: (String) -> Unit)
     {
-        val call = retrofitAPI.deleteEmployeeRequest("Bearer $accessToken",employeeRequestDto)
+        val call = retrofitAPI.deleteEmployeeRequest("Bearer $accessToken",requestId)
 
         call.enqueue(object : Callback<String> {
             override fun onResponse(call: Call<String>, response: Response<String>) {

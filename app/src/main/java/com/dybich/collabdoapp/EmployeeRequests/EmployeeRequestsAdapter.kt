@@ -21,6 +21,16 @@ class EmployeeRequestsAdapter(private var requestList : List<EmployeeRequestDto>
 
     private lateinit var snackbar : Snackbar
 
+    interface OnItemCLickListener{
+        fun onItemCLick(position : Int)
+    }
+
+    private lateinit var listener : OnItemCLickListener
+
+    public fun setOnItemCLickListener(onItemCLickListener: OnItemCLickListener){
+        listener = onItemCLickListener
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EmployeeRequestsViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context).inflate(R.layout.employee_request_item, parent, false)
         return EmployeeRequestsViewHolder(layoutInflater)
@@ -42,40 +52,22 @@ class EmployeeRequestsAdapter(private var requestList : List<EmployeeRequestDto>
 
         holder.acceptRequestButton.setOnClickListener(){
             performKeycloakAction("accept", requestList[position])
+            listener.onItemCLick(position)
 
         }
 
         holder.deleteRequestButton.setOnClickListener(){
             performKeycloakAction("delete",requestList[position])
+            listener.onItemCLick(position)
         }
     }
 
-    private fun getEmployeeRequests( accessToken : String){
-        leaderAPI.getEmployeesRequests(accessToken,
-            onSuccess = {list ->
-
-                if (list != null) {
-                    if(list.isNotEmpty()){
-                        requestList = list
-                        notifyDataSetChanged()
-                    }
-                }
-                else{
-                    snackbar.show("ERROR")
-                }
-            },
-            onFailure = {error->
-                snackbar.show(error)
-            })
-    }
-
     private fun acceptRequest( accessToken : String, employeeRequestDto: EmployeeRequestDto){
-        leaderAPI.acceptRequest(accessToken,employeeRequestDto,
+        leaderAPI.acceptRequest(accessToken,employeeRequestDto.employeeRequestId,
             onSuccess = {employeeId ->
 
                 if (employeeId != null) {
-                    snackbar.show("User ${employeeRequestDto.username} added")
-                    getEmployeeRequests(accessToken)
+                    snackbar.show("User ${employeeRequestDto.username}request accepted")
                 }
                 else{
                     snackbar.show("ERROR")
@@ -87,11 +79,10 @@ class EmployeeRequestsAdapter(private var requestList : List<EmployeeRequestDto>
     }
 
     private fun deleteRequest( accessToken : String, employeeRequestDto: EmployeeRequestDto){
-        leaderAPI.deleteRequest(accessToken,employeeRequestDto,
+        leaderAPI.deleteRequest(accessToken,employeeRequestDto.employeeRequestId,
             onSuccess = {employeeId ->
                 if (employeeId != null) {
-                    snackbar.show("User ${employeeRequestDto.username} deleted")
-                    getEmployeeRequests(accessToken)
+                    snackbar.show("User ${employeeRequestDto.username} request deleted")
                 }
                 else{
                     snackbar.show("ERROR")
@@ -102,7 +93,7 @@ class EmployeeRequestsAdapter(private var requestList : List<EmployeeRequestDto>
             })
     }
 
-    private fun performKeycloakAction(requestType:String,employeeRequestDto: EmployeeRequestDto){
+    private fun performKeycloakAction(requestType:String,employeeRequestDto : EmployeeRequestDto){
         keycloakAPI.getFromRefreshToken(refreshToken,
             onSuccess = {data ->
                 refreshToken = data.refresh_token
@@ -114,7 +105,7 @@ class EmployeeRequestsAdapter(private var requestList : List<EmployeeRequestDto>
                 }
             },
             onFailure = {error->
-                if(error == "Refresh token expired"){
+                if(error == "Refresh token expired" || error=="Token is not active"){
                     keycloakAPI.getFromEmailAndPass(email,password,
                         onSuccess = {data ->
                             refreshToken = data.refresh_token

@@ -8,15 +8,15 @@ import retrofit2.http.*
 interface ILeaderAPI {
 
     @GET("leader/requests")
-    fun getEmployeesRequests(@Header("Authorization") token: String) : Call<List<EmployeeRequestDto>>
+    fun getEmployeesRequests(@Header("Authorization") token: String) : Call<ArrayList<EmployeeRequestDto>>
 
-    @POST("leader/employee")
+    @POST("leader/employee/{requestId}")
     fun acceptEmployeeRequest(@Header("Authorization") token: String,
-                              @Body employeeRequestDto : EmployeeRequestDto) : Call<String>
+                              @Path("requestId") employeeRequestId: String) : Call<String>
 
-    @DELETE("leader/employee")
+    @DELETE("leader/employee/{requestId}")
     fun deleteEmployeeRequest(@Header("Authorization") token: String,
-                              @Body employeeRequestDto: EmployeeRequestDto) : Call<String>
+                              @Path("requestId") employeeRequestId: String) : Call<String>
 
     @GET("leader/employees")
     fun getEmployeeList(@Header("Authorization") token: String,  @Query("leaderId") leaderId: String?) : Call<List<EmployeeDto>>
