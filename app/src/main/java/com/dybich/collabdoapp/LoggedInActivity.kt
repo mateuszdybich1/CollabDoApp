@@ -3,6 +3,8 @@ package com.dybich.collabdoapp
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import android.widget.TextView
 import androidx.activity.viewModels
@@ -38,13 +40,9 @@ class LoggedInActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         email= intent.getStringExtra("email")
-
         password = intent.getStringExtra("password")
-
         leaderId = intent.getStringExtra("leaderId")
-
         isUserLeader = intent.getBooleanExtra("isLeader",false)
-
         refreshToken = intent.getStringExtra("refreshToken")
 
         userAPI = UserAPI()
@@ -140,6 +138,19 @@ class LoggedInActivity : AppCompatActivity() {
                 }
 
             })
+    }
+
+    private var doubleBackToExitPressedOnce = false
+    override fun onBackPressed() {
+        if (doubleBackToExitPressedOnce) {
+            finishAffinity()
+            finish()
+        }
+
+        this.doubleBackToExitPressedOnce = true
+        snackbar.show("click BACK again to exit")
+
+        Handler(Looper.getMainLooper()).postDelayed(Runnable { doubleBackToExitPressedOnce = false }, 2000)
     }
 
 

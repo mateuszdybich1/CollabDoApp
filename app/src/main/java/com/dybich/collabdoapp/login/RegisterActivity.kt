@@ -70,7 +70,7 @@ class RegisterActivity : AppCompatActivity() {
                                     onSuccess = { isVerified ->
 
                                         if(!isVerified){
-                                            snackbar.show("Success! Sent verification email")
+                                            Toast.makeText(this,"Success! Sent verification email",Toast.LENGTH_LONG).show()
                                             val intent = Intent(this, LoginActivity::class.java)
                                             startActivity(intent)
                                         }

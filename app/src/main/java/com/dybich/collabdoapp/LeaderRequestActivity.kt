@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.widget.Toast
 import com.dybich.collabdoapp.API.EmployeeAPI
 import com.dybich.collabdoapp.API.KeycloakAPI
 import com.dybich.collabdoapp.Dtos.EmployeeDto
@@ -111,7 +112,7 @@ class LeaderRequestActivity : AppCompatActivity() {
 
             },
             onFailure = {error->
-                if(error == "Refresh token expired"){
+                if(error == "Refresh token expired"|| error=="Token is not active"){
                     keycloakAPI.getFromEmailAndPass(email!!,password!!,
                         onSuccess = {data ->
 
@@ -119,7 +120,6 @@ class LeaderRequestActivity : AppCompatActivity() {
 
                             if(requestType == "create"){
                                 createRequest(data.access_token)
-                                startRequestLoop(refreshToken!!)
                             }
                             else if(requestType == "delete"){
                                 deleteRequest(data.access_token)
@@ -146,6 +146,8 @@ class LeaderRequestActivity : AppCompatActivity() {
 
                 employeeDto?.leaderRequestEmail = binding.EmailET.text.toString()
                 transition.stopLoading()
+
+                startRequestLoop(refreshToken!!)
             },
             onFailure = {error->
                 snackbar.show(error)
@@ -200,13 +202,18 @@ class LeaderRequestActivity : AppCompatActivity() {
                         employeeDto = dto
 
                         if(employeeDto!!.leaderId != null){
-                            snackbar.show("Leader accepted your request")
+                            Toast.makeText(this,"Leader accepted your request",Toast.LENGTH_LONG).show()
                             val intent = Intent(this@LeaderRequestActivity, LoggedInActivity::class.java)
                             intent.putExtra("email", email)
                             intent.putExtra("password", password)
                             intent.putExtra("leaderId", employeeDto!!.leaderId)
+                            intent.putExtra("refreshToken", data.refresh_token)
                             startActivity(intent)
                             finish()
+                        }
+                        else if((employeeDto!!.leaderRequestEmail == null || employeeDto!!.leaderRequestEmail =="") && employeeDto!!.leaderId == null){
+                            snackbar.show("Leader refused Your request")
+                            resetLayout(binding)
                         }
                     },
                     onFailure ={error->
