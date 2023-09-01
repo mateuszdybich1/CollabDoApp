@@ -3,7 +3,6 @@ package com.dybich.collabdoapp.login
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.Toast
 import com.dybich.collabdoapp.API.EmployeeAPI
 import com.dybich.collabdoapp.API.KeycloakAPI
 import com.dybich.collabdoapp.API.UserAPI
@@ -31,6 +30,7 @@ class LoginActivity : AppCompatActivity() {
 
         val transition = ButtonTransition(binding.loginLayout,binding.LoadingCircle,binding.LoginBTN, this@LoginActivity)
 
+        val snackbar : com.dybich.collabdoapp.Snackbar = com.dybich.collabdoapp.Snackbar(binding.root,this@LoginActivity)
 
         val employeeAPI = EmployeeAPI()
         val keycloakAPI = KeycloakAPI()
@@ -80,7 +80,9 @@ class LoginActivity : AppCompatActivity() {
                                                             val intent = Intent(this@LoginActivity, LoggedInActivity::class.java)
                                                             intent.putExtra("email", email)
                                                             intent.putExtra("password", password)
+                                                            intent.putExtra("isLeader", false)
                                                             intent.putExtra("leaderId", employeeDto.leaderId)
+                                                            intent.putExtra("refreshToken", keycloakTokenData.refresh_token)
                                                             startActivity(intent)
 
                                                             transition.stopLoading()
@@ -88,7 +90,7 @@ class LoginActivity : AppCompatActivity() {
 
                                                     },
                                                     onFailure = {error->
-                                                        Toast.makeText(this,error,Toast.LENGTH_LONG).show()
+                                                        snackbar.show(error)
                                                         transition.stopLoading()
                                                     })
 
@@ -97,29 +99,31 @@ class LoginActivity : AppCompatActivity() {
                                                 val intent = Intent(this@LoginActivity, LoggedInActivity::class.java)
                                                 intent.putExtra("email", email)
                                                 intent.putExtra("password", password)
+                                                intent.putExtra("isLeader", true)
+                                                intent.putExtra("refreshToken", keycloakTokenData.refresh_token)
                                                 startActivity(intent)
 
                                                 transition.stopLoading()
                                             }
 
                                         }, onFailure = {error ->
-                                            Toast.makeText(this,error,Toast.LENGTH_LONG).show()
+                                            snackbar.show(error)
                                             transition.stopLoading()
                                         })
 
 
                                 }
                                 else{
-                                    Toast.makeText(this, "Please verify your email", Toast.LENGTH_LONG).show()
+                                    snackbar.show("Please verify your email")
                                     transition.stopLoading()
                                 }
 
                             }, onFailure = {error ->
-                            Toast.makeText(this@LoginActivity,error,Toast.LENGTH_LONG).show()
+                                snackbar.show(error)
                             transition.stopLoading()})
 
                     }, onFailure = {error ->
-                        Toast.makeText(this,error,Toast.LENGTH_LONG).show()
+                        snackbar.show(error)
                         transition.stopLoading()
                     })
 

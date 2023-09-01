@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+        xmlns:tools="http://schemas.android.com/tools"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        tools:showIn = "navigation_view">
+
+    <group android:id="@+id/group1">
+
+        <item
+
+                android:checkable="true"
+                android:icon="@drawable/home_icon"
+                android:id="@+id/projectsFragment"
+                android:title="Projects">
+
+        </item>
+
+        <item
+
+                android:checkable="true"
+                android:icon="@drawable/person_icon"
+                android:id="@+id/projectGroupFragment"
+                android:title="Project Group">
+
+        </item>
+        <item
+
+                android:checkable="true"
+                android:icon="@drawable/person_request_icon"
+                android:id="@+id/employeeRequestsFragment"
+                android:title="Employee Requests">
+
+        </item>
+
+    </group>
+
+    <item
+
+            android:icon="@drawable/logout_icon"
+            android:id="@+id/logout"
+            android:title="Log out">
+
+    </item>
+
+</menu>

@@ -5,8 +5,6 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
-import android.widget.Toast
 import com.dybich.collabdoapp.API.EmployeeAPI
 import com.dybich.collabdoapp.API.KeycloakAPI
 import com.dybich.collabdoapp.Dtos.EmployeeDto
@@ -29,6 +27,8 @@ class LeaderRequestActivity : AppCompatActivity() {
     private lateinit var transition : ButtonTransition
     private lateinit var employeeAPI: EmployeeAPI
     private lateinit var keycloakAPI : KeycloakAPI
+
+    private lateinit var snackbar : Snackbar
 
     private var isListening : Boolean = false
     private lateinit var  runnable:  Runnable
@@ -54,6 +54,7 @@ class LeaderRequestActivity : AppCompatActivity() {
             binding.SendRequest,
             this@LeaderRequestActivity)
 
+        snackbar = com.dybich.collabdoapp.Snackbar(binding.root,this@LeaderRequestActivity)
 
         if(employeeDto?.leaderRequestEmail !="" && employeeDto?.leaderRequestEmail != null ){
             updateLayout(binding, employeeDto!!.leaderRequestEmail!!)
@@ -125,12 +126,12 @@ class LeaderRequestActivity : AppCompatActivity() {
                             }
                         },
                         onFailure = {err->
-                            Toast.makeText(this@LeaderRequestActivity, err,Toast.LENGTH_LONG).show()
+                            snackbar.show(err)
                             transition.stopLoading()
                         })
                 }
                 else{
-                    Toast.makeText(this@LeaderRequestActivity, error,Toast.LENGTH_LONG).show()
+                    snackbar.show(error)
                     transition.stopLoading()
                 }
 
@@ -140,14 +141,14 @@ class LeaderRequestActivity : AppCompatActivity() {
     private fun createRequest( accessToken : String){
         employeeAPI.createRequest(accessToken, binding.EmailET.text.toString(),
             onSuccess = {requestId ->
-                Toast.makeText(this@LeaderRequestActivity, "Request created",Toast.LENGTH_LONG).show()
+                snackbar.show("Request created")
                 updateLayout(binding, binding.EmailET.text.toString())
 
                 employeeDto?.leaderRequestEmail = binding.EmailET.text.toString()
                 transition.stopLoading()
             },
             onFailure = {error->
-                Toast.makeText(this@LeaderRequestActivity, error,Toast.LENGTH_LONG).show()
+                snackbar.show(error)
                 transition.stopLoading()
             })
     }
@@ -155,13 +156,13 @@ class LeaderRequestActivity : AppCompatActivity() {
     private fun deleteRequest(accessToken : String){
         employeeAPI.deleteRequest(accessToken, binding.EmailET.text.toString(),
             onSuccess = {employeeid ->
-                Toast.makeText(this@LeaderRequestActivity, "Request deleted",Toast.LENGTH_LONG).show()
+                snackbar.show("Request deleted")
                 resetLayout(binding)
                 employeeDto?.leaderRequestEmail = ""
                 transition.stopLoading()
             },
             onFailure = {error->
-                Toast.makeText(this@LeaderRequestActivity, error,Toast.LENGTH_LONG).show()
+                snackbar.show(error)
 
                 if(error == "Request not found"){
                     resetLayout(binding)
@@ -182,10 +183,7 @@ class LeaderRequestActivity : AppCompatActivity() {
                 }
             }
         }
-
         handler.postDelayed(runnable, 30000)
-
-
     }
 
     private fun stopRequestLoop() {
@@ -202,7 +200,7 @@ class LeaderRequestActivity : AppCompatActivity() {
                         employeeDto = dto
 
                         if(employeeDto!!.leaderId != null){
-                            Toast.makeText(this@LeaderRequestActivity,"Leader accepted your request", Toast.LENGTH_LONG).show()
+                            snackbar.show("Leader accepted your request")
                             val intent = Intent(this@LeaderRequestActivity, LoggedInActivity::class.java)
                             intent.putExtra("email", email)
                             intent.putExtra("password", password)
@@ -212,11 +210,11 @@ class LeaderRequestActivity : AppCompatActivity() {
                         }
                     },
                     onFailure ={error->
-                        Toast.makeText(this@LeaderRequestActivity, error,Toast.LENGTH_LONG).show()
+                        snackbar.show(error)
                     })
             },
             onFailure = {error->
-                Toast.makeText(this@LeaderRequestActivity, error,Toast.LENGTH_LONG).show()
+                snackbar.show(error)
             })
 
     }
@@ -246,7 +244,7 @@ class LeaderRequestActivity : AppCompatActivity() {
         }
 
         this.doubleBackToExitPressedOnce = true
-        Toast.makeText(this, "click BACK again to exit", Toast.LENGTH_SHORT).show()
+        snackbar.show("click BACK again to exit")
 
         Handler(Looper.getMainLooper()).postDelayed(Runnable { doubleBackToExitPressedOnce = false }, 2000)
     }

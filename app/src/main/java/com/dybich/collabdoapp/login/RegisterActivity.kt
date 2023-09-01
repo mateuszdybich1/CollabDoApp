@@ -32,6 +32,7 @@ class RegisterActivity : AppCompatActivity() {
 
         ClearErrors.clearErrors(listOf(usernameErrorObj,emailErrorObj,passErrorObj,repPassErrorObj))
 
+        val snackbar : com.dybich.collabdoapp.Snackbar = com.dybich.collabdoapp.Snackbar(binding.root,this@RegisterActivity)
 
         val userAPI = UserAPI()
         val keycloakAPI = KeycloakAPI()
@@ -69,26 +70,26 @@ class RegisterActivity : AppCompatActivity() {
                                     onSuccess = { isVerified ->
 
                                         if(!isVerified){
-                                            Toast.makeText(this, "Success! Sent verification email",Toast.LENGTH_LONG).show()
+                                            snackbar.show("Success! Sent verification email")
                                             val intent = Intent(this, LoginActivity::class.java)
                                             startActivity(intent)
                                         }
                                         transition.stopLoading()
                                     }, onFailure = { error->
-                                        Toast.makeText(this@RegisterActivity, error,Toast.LENGTH_LONG).show()
 
+                                        snackbar.show(error)
                                         transition.stopLoading()})
 
                             },
                             onFailure = {error->
-                                Toast.makeText(this@RegisterActivity, error,Toast.LENGTH_LONG).show()
+                                snackbar.show(error)
 
                                 transition.stopLoading()
                             } )
 
 
                     }, onFailure = { error->
-                        Toast.makeText(this@RegisterActivity, error,Toast.LENGTH_LONG).show()
+                        snackbar.show(error)
 
                         transition.stopLoading()})
 

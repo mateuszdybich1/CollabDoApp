@@ -25,8 +25,6 @@ class ButtonTransition(
     private val transparentColor = ContextCompat.getColor(context, R.color.color_transparent_100)
     private val whiteColor = ContextCompat.getColor(context, R.color.secondaryBlue)
 
-    val unclickedColor = getColorStateList(context,R.color.white)
-    val clickedColor = getColorStateList(context,R.color.mainBlue)
 
     fun startLoading(){
 

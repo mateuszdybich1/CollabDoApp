@@ -10,4 +10,5 @@
     <color name="color_transparent_100">#00AC97D3</color>
     <color name="mainBlue">#0B3162</color>
     <color name="secondaryBlue">#11233A</color>
+    <color name="red">#CA0C0C</color>
 </resources>

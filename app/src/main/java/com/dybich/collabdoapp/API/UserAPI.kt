@@ -3,6 +3,7 @@ package com.dybich.collabdoapp.API
 import android.content.Context
 import android.hardware.camera2.CaptureFailure
 import android.widget.Toast
+import com.dybich.collabdoapp.Dtos.UserDto
 import com.dybich.collabdoapp.Dtos.UserRegisterDto
 import com.dybich.collabdoapp.IRetrofitAPI.IUserAPI
 import retrofit2.Call
@@ -170,4 +171,46 @@ class UserAPI () {
              }
          })
     }
+
+
+    fun getUserDto(accessToken: String,
+                     onSuccess: (UserDto) -> Unit,
+                     onFailure: (String) -> Unit) {
+
+
+        val call = retrofitAPI.getUser("Bearer $accessToken" )
+
+        call.enqueue(object : Callback<UserDto> {
+            override fun onResponse(call: Call<UserDto>, response: Response<UserDto>) {
+                if (response.isSuccessful) {
+                    val user = response.body()
+                    if (user != null) {
+                        onSuccess(user)
+                    } else {
+                        onFailure("ERROR")
+                    }
+                }
+                else if(response.code() == 401){
+                    onFailure("UNATHORIZED")
+                }
+                else {
+                    val errorBody = response.errorBody()!!.string()
+                    onFailure(errorBody)
+                }
+            }
+
+            override fun onFailure(call: Call<UserDto>, t: Throwable) {
+                if(t.message.toString().contains("Failed to connect")){
+                    onFailure("No internet connection")
+                }
+                else if(t.message.toString().contains("failed to connect")){
+                    onFailure("Server error")
+                }
+                else{
+                    onFailure(t.message.toString())
+                }
+            }
+        })
+    }
+
 }

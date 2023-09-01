@@ -23,6 +23,7 @@ class ResetPasswordActivity : AppCompatActivity() {
 
         val transition = ButtonTransition(binding.ResetPasswordLayout, binding.LoadingCircle,binding.ResetPassword, this@ResetPasswordActivity)
 
+        val snackbar : com.dybich.collabdoapp.Snackbar = com.dybich.collabdoapp.Snackbar(binding.root,this@ResetPasswordActivity)
 
         val userAPI = UserAPI()
 
@@ -35,12 +36,12 @@ class ResetPasswordActivity : AppCompatActivity() {
                 transition.startLoading()
                 userAPI.resetPassword(binding.EmailET.text.toString(),
                     onSuccess = {message ->
-                        Toast.makeText(this@ResetPasswordActivity,message,Toast.LENGTH_LONG).show()
+                        snackbar.show(message)
                         val intent = Intent(this, LoginActivity::class.java)
                         startActivity(intent)
                     },
                     onFailure = {error->
-                        Toast.makeText(this@ResetPasswordActivity,error,Toast.LENGTH_LONG).show()
+                        snackbar.show(error)
                         transition.stopLoading()
                     })
             }

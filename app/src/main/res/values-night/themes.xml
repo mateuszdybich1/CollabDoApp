@@ -12,9 +12,48 @@
 
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/mainBlue</item>
-        <item name="colorSecondaryVariant">@color/baby_purple</item>
+        <item name="colorSecondaryVariant">@color/mainBlue</item>
         <item name="colorOnSecondary">@color/black</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">@color/mainBlue</item>
     </style>
+
+    <style name="MenuTheme" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowTranslucentStatus">true</item>
+
+        <item name="colorPrimary">@color/white</item>
+        <item name="colorOnPrimary">@color/black</item>
+
+        <item name="colorOutline">@color/light_grey</item>
+
+
+        <!-- BOTTOM NAVIGATION. -->
+        <item name="android:navigationBarColor">@color/mainBlue</item>
+
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/mainBlue</item>
+        <item name="colorSecondaryVariant">@color/mainBlue</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor" tools:targetApi="l">@color/mainBlue</item>
+
+        <item name="colorNavigationItem">@color/drawer_menu_selector</item>
+        <item name="colorNavigationItemSelected">@color/white</item>
+        <item name="drawableNavigationItemBackground">@drawable/menu_background_color_state</item>
+    </style>
+
+    <style name="Widget.Custom.NavigationView" parent="Widget.Design.NavigationView">
+        <item name="itemIconTint">?attr/colorNavigationItem</item>
+        <item name="itemTextColor">?attr/colorNavigationItem</item>
+        <item name="itemBackground">?attr/drawableNavigationItemBackground</item>
+    </style>
+
+    <style name="RoundFloatingActionButton" parent="">
+        <item name="shapeAppearanceOverlay">@style/RoundShapeAppearanceOverlay</item>
+    </style>
+
+    <style name="RoundShapeAppearanceOverlay" parent="">
+        <item name="cornerSize">50%</item>
+    </style>
+
 </resources>
