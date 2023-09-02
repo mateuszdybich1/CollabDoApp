@@ -7,14 +7,16 @@ import android.os.Handler
 import android.os.Looper
 import android.view.View
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.onNavDestinationSelected
 import androidx.navigation.ui.setupWithNavController
+import com.dybich.collabdoapp.API.EmployeeAPI
 import com.dybich.collabdoapp.API.KeycloakAPI
 import com.dybich.collabdoapp.API.UserAPI
-import com.dybich.collabdoapp.databinding.ActivityLoggedInBinding
 import com.dybich.collabdoapp.login.LoginActivity
+import com.dybich.collabdoapp.databinding.ActivityLoggedInBinding
 
 class LoggedInActivity : AppCompatActivity() {
 
@@ -24,6 +26,8 @@ class LoggedInActivity : AppCompatActivity() {
 
     private lateinit var userAPI : UserAPI
 
+    private lateinit var employeeAPI : EmployeeAPI
+
     private lateinit var snackbar : Snackbar
 
     private var email : String? = null
@@ -31,6 +35,10 @@ class LoggedInActivity : AppCompatActivity() {
     private var leaderId : String? = null
     private var isUserLeader : Boolean = false
     private var refreshToken : String? = null
+
+    private var isListening : Boolean = false
+    private lateinit var  runnable:  Runnable
+    private val handler = Handler(Looper.getMainLooper())
 
     private val sharedViewModel: SharedViewModel by viewModels()
 
@@ -47,6 +55,7 @@ class LoggedInActivity : AppCompatActivity() {
 
         userAPI = UserAPI()
         keycloakAPI = KeycloakAPI()
+        employeeAPI = EmployeeAPI()
 
         snackbar = com.dybich.collabdoapp.Snackbar(binding.root,this@LoggedInActivity)
 
@@ -59,6 +68,7 @@ class LoggedInActivity : AppCompatActivity() {
         sharedViewModel.refreshToken.value = refreshToken
         sharedViewModel.email.value = email
         sharedViewModel.password.value = password
+        sharedViewModel.isLeader.value = isUserLeader
         sharedViewModel.leaderId.value = leaderId
 
 
@@ -98,7 +108,49 @@ class LoggedInActivity : AppCompatActivity() {
             }
             true
         }
+        if(!isUserLeader){
+            startRequestLoop(refreshToken!!)
+        }
+
     }
+
+    private fun startRequestLoop(refreshToken:String) {
+        isListening = true
+
+        runnable = object : Runnable {
+            override fun run() {
+                if (isListening) {
+                    refreshTokenRequest(refreshToken)
+                    handler.postDelayed(this, 30000)
+                }
+            }
+        }
+        handler.postDelayed(runnable, 30000)
+    }
+    private fun refreshTokenRequest(refreshToken:String) {
+
+        keycloakAPI.getFromRefreshToken(refreshToken,
+            onSuccess = {data ->
+                employeeAPI.getEmployeeDto(data.access_token,
+                    onSuccess = {employeeDto ->
+                        if((employeeDto.leaderRequestEmail == null || employeeDto.leaderRequestEmail =="") && employeeDto.leaderId==null){
+                            Toast.makeText(this,"Leader removed you from group", Toast.LENGTH_LONG).show()
+                            val intent = Intent(this@LoggedInActivity, LoginActivity::class.java)
+                            startActivity(intent)
+                            finish()
+                            isListening = false
+                        }
+                    },
+                    onFailure = {error->
+                        snackbar.show(error)
+                    })
+            },
+            onFailure = {error->
+                snackbar.show(error)
+            })
+
+    }
+
 
     private fun getUserDto( accessToken : String){
         userAPI.getUserDto(accessToken,

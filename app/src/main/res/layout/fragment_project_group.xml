@@ -1,14 +1,121 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout
+        xmlns:app="http://schemas.android.com/apk/res-auto" android:background="@color/mainBlue"
+        xmlns:android="http://schemas.android.com/apk/res/android"
              xmlns:tools="http://schemas.android.com/tools"
              android:layout_width="match_parent"
              android:layout_height="match_parent"
-             tools:context=".ProjectGroupFragment">
+             tools:context=".ProjectGroup.ProjectGroupFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/projectGroupRefresh"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="Project Group"/>
+            android:layout_height="match_parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"
+                android:paddingTop="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+            <com.google.android.material.card.MaterialCardView
+
+                    app:cardCornerRadius="30dp"
+
+                    app:cardElevation="20dp"
+
+                    app:cardBackgroundColor="@color/white"
+
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" app:layout_constraintTop_toTopOf="parent"
+                    tools:layout_editor_absoluteX="20dp" android:id="@+id/materialCardView4">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                        android:paddingTop="20dp"
+                        android:paddingBottom="20dp"
+                        android:paddingRight="10dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+
+                    <LinearLayout
+                            android:layout_marginRight="10dp"
+                            android:layout_marginLeft="20dp"
+                            android:orientation="horizontal"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" app:layout_constraintEnd_toStartOf="@+id/acceptButton"
+                            app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintHorizontal_bias="0.0">
+                        <TextView
+                                android:layout_marginRight="10dp"
+                                android:textColor="@color/secondaryBlue"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textAppearance="?attr/textAppearanceHeadline6"
+                                android:text="Leader:"/>
+
+                        <TextView
+                                android:id="@+id/leaderEmail"
+                                android:textColor="@color/mainBlue"
+                                android:layout_width="fill_parent"
+                                android:layout_height="wrap_content"
+                                android:textAppearance="?attr/textAppearanceHeadline6"
+                                android:text="Text"/>
+                    </LinearLayout>
+
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <androidx.recyclerview.widget.RecyclerView
+
+                    tools:listitem="@layout/project_group_member_item"
+                    android:layout_marginTop="10dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/materialCardView4" android:id="@+id/projectGroupRV"
+                    tools:layout_editor_absoluteX="20dp">
+
+            </androidx.recyclerview.widget.RecyclerView>
+
+            <TextView
+                    android:visibility="gone"
+                    android:id="@+id/projectGroupTV"
+                    android:gravity="center_horizontal|center_vertical"
+                    android:textSize="30sp"
+                    android:textColor="@color/white"
+                    android:text="No requests found. Please refresh"
+                    android:layout_margin="50dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="@+id/projectGroupRV"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/projectGroupRV">
+
+            </TextView>
+
+            <Button
+                    android:id="@+id/leaveProject"
+                    android:textSize="18sp"
+                    android:textColor="@color/white"
+                    android:layout_marginBottom="20dp"
+                    android:backgroundTint="@color/secondaryBlue"
+                    android:text="Leave group"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    app:layout_constraintBottom_toBottomOf="@+id/recyclerView"
+                    app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent">
+
+            </Button>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
 
 </FrameLayout>

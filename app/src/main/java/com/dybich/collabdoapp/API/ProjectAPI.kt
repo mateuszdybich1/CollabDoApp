@@ -1,9 +1,7 @@
 package com.dybich.collabdoapp.API
 
 import com.dybich.collabdoapp.Dtos.ProjectDto
-import com.dybich.collabdoapp.Dtos.UserRegisterDto
 import com.dybich.collabdoapp.IRetrofitAPI.IProjectAPI
-import com.dybich.collabdoapp.IRetrofitAPI.IUserAPI
 import com.dybich.collabdoapp.ProjectStatus
 import retrofit2.Call
 import retrofit2.Callback
@@ -30,7 +28,7 @@ class ProjectAPI () {
                     onFailure: (String) -> Unit)
     {
 
-        val call = retrofitAPI.getProjectList("Bearer $accessToken", leaderId, projectStatus, pageNumber)
+        val call = retrofitAPI.getinProgressProjectList("Bearer $accessToken", leaderId, projectStatus, pageNumber)
 
         call.enqueue(object : Callback<List<ProjectDto>>{
 

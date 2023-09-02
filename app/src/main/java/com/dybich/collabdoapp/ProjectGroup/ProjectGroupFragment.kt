@@ -1,43 +1,60 @@
-package com.dybich.collabdoapp.EmployeeRequests
+package com.dybich.collabdoapp.ProjectGroup
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.findViewTreeViewModelStoreOwner
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.dybich.collabdoapp.API.EmployeeAPI
 import com.dybich.collabdoapp.API.KeycloakAPI
 import com.dybich.collabdoapp.API.LeaderAPI
-import com.dybich.collabdoapp.Dtos.EmployeeRequestDto
+import com.dybich.collabdoapp.Dtos.EmployeeDto
+import com.dybich.collabdoapp.EmployeeRequests.EmployeeRequestsAdapter
+import com.dybich.collabdoapp.EmployeeRequests.ProjectGroupAdapter
+import com.dybich.collabdoapp.LoggedInActivity
 import com.dybich.collabdoapp.R
 import com.dybich.collabdoapp.SharedViewModel
 import com.dybich.collabdoapp.Snackbar
+import com.dybich.collabdoapp.login.LoginActivity
 
 
-class EmployeeRequestsFragment : Fragment() {
+class ProjectGroupFragment : Fragment() {
 
     private var email: String? = null
     private var password : String? = null
     private var refreshToken : String? = null
+    private var isLeader : Boolean? = null
+    private var leaderId : String? = null
 
     private lateinit var snackbar : Snackbar
 
     private lateinit var keycloakAPI : KeycloakAPI
     private lateinit var leaderAPI : LeaderAPI
+    private lateinit var employeeAPI: EmployeeAPI
 
-    private lateinit var infoTV: TextView
+    private var leaderEmail: String = "Loading"
+    private lateinit var leader: TextView
+    private lateinit var infoTV : TextView
     private lateinit var recyclerView: RecyclerView
+    private lateinit var quitButton : Button
     private lateinit var refresh: SwipeRefreshLayout
 
-    private lateinit var requestsAdapter : EmployeeRequestsAdapter
-
-    private lateinit var requestList : ArrayList<EmployeeRequestDto>
+    private lateinit var adapter: ProjectGroupAdapter
 
     private val sharedViewModel: SharedViewModel by activityViewModels()
+
+
+    private lateinit var groupMembers : ArrayList<EmployeeDto>
 
     private lateinit var view : View
 
@@ -46,10 +63,27 @@ class EmployeeRequestsFragment : Fragment() {
 
         keycloakAPI = KeycloakAPI()
         leaderAPI = LeaderAPI()
+        employeeAPI = EmployeeAPI()
 
         email = sharedViewModel.email.value
         password = sharedViewModel.password.value
         refreshToken = sharedViewModel.refreshToken.value
+        isLeader = sharedViewModel.isLeader.value
+        leaderId = sharedViewModel.leaderId.value
+
+
+
+
+
+        if(!isLeader!!){
+
+            getLeaderEmail(leaderId!!)
+        }
+        else{
+            leaderEmail = email.toString()
+        }
+
+
     }
 
     override fun onCreateView(
@@ -57,13 +91,21 @@ class EmployeeRequestsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
 
+        view = inflater.inflate(R.layout.fragment_project_group, container, false)
 
-        view = inflater.inflate(R.layout.fragment_employee_requests, container, false)
         snackbar = com.dybich.collabdoapp.Snackbar(view,view.context)
 
-        infoTV = view.findViewById(R.id.employeeRequestTV)
-        recyclerView = view.findViewById(R.id.employeeRequestsRV)
-        refresh = view.findViewById(R.id.employeeRequestsRefresh)
+        leader = view.findViewById(R.id.leaderEmail)
+        leader.text = leaderEmail
+
+        quitButton = view.findViewById(R.id.leaveProject)
+        refresh = view.findViewById(R.id.projectGroupRefresh)
+        infoTV = view.findViewById(R.id.projectGroupTV)
+        recyclerView = view.findViewById(R.id.projectGroupRV)
+
+        if(isLeader!!){
+            quitButton.visibility = View.GONE
+        }
 
         performKeycloakAction()
 
@@ -75,34 +117,49 @@ class EmployeeRequestsFragment : Fragment() {
     }
 
 
-    private fun getEmployeeRequests( accessToken : String){
-        leaderAPI.getEmployeesRequests(accessToken,
+
+    private fun getLeaderEmail(leaderId:String){
+        leaderAPI.getLeaderEmail(leaderId, onSuccess = {email->
+              if(email != null){
+                  leader.text = email
+              }
+              else{
+                  snackbar.show("ERROR")
+              }
+        }, onFailure = {error->
+            snackbar.show(error)
+        } )
+    }
+
+    private fun getEmployees( accessToken : String){
+        leaderAPI.getEmployeeList(accessToken,
+            leaderId,
             onSuccess = {list ->
                 refresh.isRefreshing = false
                 if (list != null) {
                     if(list.isNotEmpty()){
                         infoTV.visibility = View.GONE
-                        requestList = list
+                        groupMembers = list
                         recyclerView.layoutManager = LinearLayoutManager(view.context)
-                        requestsAdapter = EmployeeRequestsAdapter(requestList,refreshToken!!,email!!,password!!, view)
-                        recyclerView.adapter = requestsAdapter
+                        adapter = ProjectGroupAdapter(groupMembers,refreshToken!!,email!!,password!!,isLeader!!, view)
+                        recyclerView.adapter = adapter
 
 
 
-                        val listener = object : EmployeeRequestsAdapter.OnItemCLickListener {
+                        val listener = object : ProjectGroupAdapter.OnItemCLickListener {
                             override fun onItemCLick(position: Int) {
-                                requestList.removeAt(position)
-                                requestsAdapter.notifyItemRemoved(position)
-                                for (i in position until requestList.size) {
-                                    requestsAdapter.notifyItemChanged(i)
+                                groupMembers.removeAt(position)
+                                adapter.notifyItemRemoved(position)
+                                for (i in position until groupMembers.size) {
+                                    adapter.notifyItemChanged(i)
                                 }
-                                if(requestList.size == 0){
+                                if(groupMembers.size == 0){
                                     infoTV.visibility = View.VISIBLE
                                 }
                             }
 
                         }
-                        requestsAdapter.setOnItemCLickListener(listener)
+                        adapter.setOnItemCLickListener(listener)
                     }
                     else{
                         infoTV.visibility = View.VISIBLE
@@ -125,14 +182,17 @@ class EmployeeRequestsFragment : Fragment() {
         keycloakAPI.getFromRefreshToken(refreshToken!!,
             onSuccess = {data ->
                 refreshToken = data.refresh_token
-                getEmployeeRequests(data.access_token)
+                getEmployees(data.access_token)
+
             },
             onFailure = {error->
                 if(error == "Refresh token expired" || error=="Token is not active"){
                     keycloakAPI.getFromEmailAndPass(email!!,password!!,
                         onSuccess = {data ->
                             refreshToken = data.refresh_token
-                            getEmployeeRequests(data.access_token)
+
+                            getEmployees(data.access_token)
+
                         },
                         onFailure = {err->
                             snackbar.show(err)

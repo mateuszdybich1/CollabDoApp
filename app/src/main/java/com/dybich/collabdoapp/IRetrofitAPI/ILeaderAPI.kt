@@ -10,6 +10,9 @@ interface ILeaderAPI {
     @GET("leader/requests")
     fun getEmployeesRequests(@Header("Authorization") token: String) : Call<ArrayList<EmployeeRequestDto>>
 
+    @GET("leader/{leaderId}/email")
+    fun getLeaderEmail(@Path("leaderId") leaderId: String) : Call<String>
+
     @POST("leader/employee/{requestId}")
     fun acceptEmployeeRequest(@Header("Authorization") token: String,
                               @Path("requestId") employeeRequestId: String) : Call<String>
@@ -18,6 +21,10 @@ interface ILeaderAPI {
     fun deleteEmployeeRequest(@Header("Authorization") token: String,
                               @Path("requestId") employeeRequestId: String) : Call<String>
 
+    @DELETE("leader/employee/{employeeId}")
+    fun removeEmployeeFromGroup(@Header("Authorization") token: String,
+                                @Path("employeeId") employeeId: String) : Call<String>
+
     @GET("leader/employees")
-    fun getEmployeeList(@Header("Authorization") token: String,  @Query("leaderId") leaderId: String?) : Call<List<EmployeeDto>>
+    fun getEmployeeList(@Header("Authorization") token: String,  @Query("leaderId") leaderId: String?) : Call<ArrayList<EmployeeDto>>
 }

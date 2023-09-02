@@ -73,7 +73,7 @@ class LoginActivity : AppCompatActivity() {
                                                             intent.putExtra("employeeDto", employeeDto)
                                                             intent.putExtra("refreshToken", keycloakTokenData.refresh_token)
                                                             startActivity(intent)
-
+                                                            finish()
                                                             transition.stopLoading()
                                                         }
                                                         else{
@@ -84,7 +84,7 @@ class LoginActivity : AppCompatActivity() {
                                                             intent.putExtra("leaderId", employeeDto.leaderId)
                                                             intent.putExtra("refreshToken", keycloakTokenData.refresh_token)
                                                             startActivity(intent)
-
+                                                            finish()
                                                             transition.stopLoading()
                                                         }
 
@@ -102,7 +102,7 @@ class LoginActivity : AppCompatActivity() {
                                                 intent.putExtra("isLeader", true)
                                                 intent.putExtra("refreshToken", keycloakTokenData.refresh_token)
                                                 startActivity(intent)
-
+                                                finish()
                                                 transition.stopLoading()
                                             }
 

@@ -73,6 +73,7 @@ class RegisterActivity : AppCompatActivity() {
                                             Toast.makeText(this,"Success! Sent verification email",Toast.LENGTH_LONG).show()
                                             val intent = Intent(this, LoginActivity::class.java)
                                             startActivity(intent)
+                                            finish()
                                         }
                                         transition.stopLoading()
                                     }, onFailure = { error->

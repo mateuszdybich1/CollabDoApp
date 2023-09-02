@@ -146,6 +146,45 @@ class EmployeeAPI () {
 
     }
 
+    fun quitProject(accessToken : String,
+                    onSuccess: (String) -> Unit,
+                    onFailure : (String) -> Unit){
+        val call = retrofitAPI.quitProject("Bearer $accessToken")
+
+        call.enqueue(object : Callback<String>{
+            override fun onResponse(call: Call<String>, response: Response<String>) {
+                if (response.isSuccessful) {
+                    val employeeId = response.body()
+                    if (employeeId != null) {
+                        onSuccess(employeeId)
+                    } else {
+                        onFailure("ERROR")
+                    }
+                }
+                else if(response.code() == 401){
+                    onFailure("UNATHORIZED")
+                }
+                else {
+                    val errorBody = response.errorBody()!!.string()
+                    onFailure(errorBody)
+                }
+            }
+
+            override fun onFailure(call: Call<String>, t: Throwable) {
+                if(t.message.toString().contains("Failed to connect")){
+                    onFailure("No internet connection")
+                }
+                else if(t.message.toString().contains("failed to connect")){
+                    onFailure("Server error")
+                }
+                else{
+                    onFailure(t.message.toString())
+                }
+            }
+        })
+
+    }
+
 
 
 }

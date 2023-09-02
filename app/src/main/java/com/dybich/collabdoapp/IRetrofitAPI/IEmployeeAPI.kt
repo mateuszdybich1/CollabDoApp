@@ -13,4 +13,7 @@ interface IEmployeeAPI {
 
     @DELETE("employee/{leaderEmail}")
     fun deleteRequest(@Header("Authorization") token: String, @Path("leaderEmail") leaderEmail : String) : Call<String>
+
+    @DELETE("employee/quit")
+    fun quitProject(@Header("Authorization") token: String) : Call<String>
 }

@@ -180,7 +180,7 @@ class LeaderRequestActivity : AppCompatActivity() {
         runnable = object : Runnable {
             override fun run() {
                 if (isListening) {
-                    refreshTokenRequest(refreshToken, keycloakAPI, employeeAPI)
+                    refreshTokenRequest(refreshToken)
                     handler.postDelayed(this, 30000)
                 }
             }
@@ -193,7 +193,7 @@ class LeaderRequestActivity : AppCompatActivity() {
         handler.removeCallbacks(runnable)
     }
 
-    private fun refreshTokenRequest(refreshToken:String, keycloakAPI: KeycloakAPI, employeeAPI: EmployeeAPI) {
+    private fun refreshTokenRequest(refreshToken:String) {
 
         keycloakAPI.getFromRefreshToken(refreshToken,
             onSuccess = {data ->
@@ -210,6 +210,7 @@ class LeaderRequestActivity : AppCompatActivity() {
                             intent.putExtra("refreshToken", data.refresh_token)
                             startActivity(intent)
                             finish()
+                            isListening = false
                         }
                         else if((employeeDto!!.leaderRequestEmail == null || employeeDto!!.leaderRequestEmail =="") && employeeDto!!.leaderId == null){
                             snackbar.show("Leader refused Your request")

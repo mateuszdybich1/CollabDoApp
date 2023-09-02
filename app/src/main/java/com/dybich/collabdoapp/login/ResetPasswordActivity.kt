@@ -3,7 +3,6 @@ package com.dybich.collabdoapp.login
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.Toast
 import com.dybich.collabdoapp.API.UserAPI
 import com.dybich.collabdoapp.ButtonTransition
 import com.dybich.collabdoapp.databinding.ActivityResetPasswordBinding
