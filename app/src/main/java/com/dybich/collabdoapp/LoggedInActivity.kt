@@ -40,7 +40,7 @@ class LoggedInActivity : AppCompatActivity() {
     private lateinit var  runnable:  Runnable
     private val handler = Handler(Looper.getMainLooper())
 
-    private val sharedViewModel: SharedViewModel by viewModels()
+    private val userViewModel: UserViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,11 +65,11 @@ class LoggedInActivity : AppCompatActivity() {
         performKeycloakAction()
 
 
-        sharedViewModel.refreshToken.value = refreshToken
-        sharedViewModel.email.value = email
-        sharedViewModel.password.value = password
-        sharedViewModel.isLeader.value = isUserLeader
-        sharedViewModel.leaderId.value = leaderId
+        userViewModel.refreshToken.value = refreshToken
+        userViewModel.email.value = email
+        userViewModel.password.value = password
+        userViewModel.isLeader.value = isUserLeader
+        userViewModel.leaderId.value = leaderId
 
 
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.drawerFragmentCV) as NavHostFragment
@@ -93,6 +93,9 @@ class LoggedInActivity : AppCompatActivity() {
             when(menuItem.itemId){
                 R.id.projectsFragment->{
                     binding.topAppBar.title = "Projects"
+                }
+                R.id.finishedProjectsFragment->{
+                    binding.topAppBar.title = "Finished Projects"
                 }
                 R.id.projectGroupFragment->{
                     binding.topAppBar.title = "Project Group"

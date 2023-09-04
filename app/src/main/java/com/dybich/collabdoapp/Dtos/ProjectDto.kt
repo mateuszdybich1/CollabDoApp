@@ -1,7 +1,12 @@
 package com.dybich.collabdoapp.Dtos
 
+import android.os.Parcelable
 import com.dybich.collabdoapp.Priority
+import kotlinx.parcelize.Parcelize
 
-data class ProjectDto(val projectId : String,
+@Parcelize
+data class ProjectDto(val projectId : String?,
     val name : String,
-    val priority : Priority)
+    val priority : Priority) : Parcelable {
+
+}

@@ -3,16 +3,18 @@ package com.dybich.collabdoapp.IRetrofitAPI
 import com.dybich.collabdoapp.Dtos.ProjectDto
 import com.dybich.collabdoapp.ProjectStatus
 import retrofit2.Call
-import retrofit2.http.GET
-import retrofit2.http.Header
-import retrofit2.http.Query
+import retrofit2.http.*
 
 interface IProjectAPI {
 
+    @POST("project")
+    fun addProject(@Header("Authorization") token: String,
+                   @Body projectDto: ProjectDto) : Call<String>
     @GET("project")
-    fun getinProgressProjectList(@Header("Authorization") token: String,
-                                 @Query("leaderId") leaderId : String?,
-                                 @Query("projectStatus") projectStatus : ProjectStatus? = ProjectStatus.InProgress,
-                                 @Query("pageNumber") pageNumber : Int? = 1) : Call<List<ProjectDto>>
+    fun getProjectList(@Header("Authorization") token: String,
+                       @Query("requestDate") requestDate : Long,
+                       @Query("leaderId") leaderId : String?,
+                       @Query("projectStatus") projectStatus : Int? = ProjectStatus.InProgress.value,
+                       @Query("pageNumber") pageNumber : Int? = 1) : Call<ArrayList<ProjectDto>>
 
 }

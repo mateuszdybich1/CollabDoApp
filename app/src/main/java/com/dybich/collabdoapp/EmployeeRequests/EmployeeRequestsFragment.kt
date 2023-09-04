@@ -7,14 +7,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.dybich.collabdoapp.API.KeycloakAPI
 import com.dybich.collabdoapp.API.LeaderAPI
 import com.dybich.collabdoapp.Dtos.EmployeeRequestDto
+import com.dybich.collabdoapp.FinishedProjects.FinishedProjectsViewModel
 import com.dybich.collabdoapp.R
-import com.dybich.collabdoapp.SharedViewModel
+import com.dybich.collabdoapp.UserViewModel
 import com.dybich.collabdoapp.Snackbar
 
 
@@ -37,7 +39,9 @@ class EmployeeRequestsFragment : Fragment() {
 
     private lateinit var requestList : ArrayList<EmployeeRequestDto>
 
-    private val sharedViewModel: SharedViewModel by activityViewModels()
+    private val userViewModel: UserViewModel by activityViewModels()
+
+    private lateinit var requestsViewModel : EmployeeRequestsViewModel
 
     private lateinit var view : View
 
@@ -47,9 +51,11 @@ class EmployeeRequestsFragment : Fragment() {
         keycloakAPI = KeycloakAPI()
         leaderAPI = LeaderAPI()
 
-        email = sharedViewModel.email.value
-        password = sharedViewModel.password.value
-        refreshToken = sharedViewModel.refreshToken.value
+        email = userViewModel.email.value
+        password = userViewModel.password.value
+        refreshToken = userViewModel.refreshToken.value
+
+        requestsViewModel = ViewModelProvider(this).get(EmployeeRequestsViewModel::class.java)
     }
 
     override fun onCreateView(
@@ -65,7 +71,40 @@ class EmployeeRequestsFragment : Fragment() {
         recyclerView = view.findViewById(R.id.employeeRequestsRV)
         refresh = view.findViewById(R.id.employeeRequestsRefresh)
 
-        performKeycloakAction()
+        if(requestsViewModel.isSaved){
+
+            if(requestsViewModel.requestsList!!.isNotEmpty()){
+                infoTV.visibility = View.GONE
+                requestList = requestsViewModel.requestsList!!
+                recyclerView.layoutManager = LinearLayoutManager(view.context)
+                requestsAdapter = EmployeeRequestsAdapter(requestList,refreshToken!!,email!!,password!!, view)
+                recyclerView.adapter = requestsAdapter
+
+
+
+                val listener = object : EmployeeRequestsAdapter.OnItemCLickListener {
+                    override fun onItemCLick(position: Int) {
+                        requestList.removeAt(position)
+                        requestsAdapter.notifyItemRemoved(position)
+                        for (i in position until requestList.size) {
+                            requestsAdapter.notifyItemChanged(i)
+                        }
+                        if(requestList.size == 0){
+                            infoTV.visibility = View.VISIBLE
+                        }
+                    }
+
+                }
+                requestsAdapter.setOnItemCLickListener(listener)
+            }
+            else{
+                infoTV.visibility = View.VISIBLE
+            }
+        }
+        else if(requestsViewModel.isSaved == false){
+            performKeycloakAction()
+        }
+
 
         refresh.setOnRefreshListener {
             performKeycloakAction()
@@ -103,6 +142,9 @@ class EmployeeRequestsFragment : Fragment() {
 
                         }
                         requestsAdapter.setOnItemCLickListener(listener)
+
+                        requestsViewModel.isSaved = true
+                        requestsViewModel.requestsList = requestList
                     }
                     else{
                         infoTV.visibility = View.VISIBLE

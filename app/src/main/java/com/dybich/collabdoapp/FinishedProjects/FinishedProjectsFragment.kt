@@ -1,4 +1,4 @@
-package com.dybich.collabdoapp.Projects
+package com.dybich.collabdoapp.FinishedProjects
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -8,47 +8,41 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.dybich.collabdoapp.*
 import com.dybich.collabdoapp.API.KeycloakAPI
 import com.dybich.collabdoapp.API.ProjectAPI
 import com.dybich.collabdoapp.Dtos.ProjectDto
-import com.dybich.collabdoapp.ProjectStatus
-import com.dybich.collabdoapp.R
-import com.dybich.collabdoapp.UserViewModel
-import com.dybich.collabdoapp.Snackbar
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+import com.dybich.collabdoapp.databinding.FragmentFinishedProjectsBinding
 import java.time.Instant
 
 
-class ProjectsFragment : Fragment() {
-
+class FinishedProjectsFragment : Fragment() {
     private var email: String? = null
     private var password : String? = null
     private var refreshToken : String? = null
-    private var isLeader : Boolean? = false
     private var leaderId : String? = null
 
+    private val userViewModel: UserViewModel by activityViewModels()
 
     private lateinit var infoTV : TextView
     private lateinit var recyclerView: RecyclerView
     private lateinit var refresh: SwipeRefreshLayout
-
-    private val userViewModel: UserViewModel by activityViewModels()
 
     private lateinit var snackbar : Snackbar
 
     private lateinit var keycloakAPI : KeycloakAPI
     private lateinit var projectAPI : ProjectAPI
 
-    private lateinit var adapter: ProjectsAdapter
+    private lateinit var adapter: FinishedProjectsAdapter
 
-    private lateinit var projects : ArrayList<ProjectDto>
-    private lateinit var projectsViewModel: ProjectsViewModel
+    private lateinit var binding: FragmentFinishedProjectsBinding
 
-    private lateinit var view: View
+    private lateinit var finishedProjects : ArrayList<ProjectDto>
+
+    private lateinit var finishedProjectsViewModel: FinishedProjectsViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,9 +50,7 @@ class ProjectsFragment : Fragment() {
         keycloakAPI = KeycloakAPI()
         projectAPI = ProjectAPI()
 
-        projectsViewModel = ViewModelProvider(this).get(ProjectsViewModel::class.java)
-
-
+        finishedProjectsViewModel = ViewModelProvider(this).get(FinishedProjectsViewModel::class.java)
     }
 
     override fun onCreateView(
@@ -69,52 +61,36 @@ class ProjectsFragment : Fragment() {
         email = userViewModel.email.value
         password = userViewModel.password.value
         refreshToken = userViewModel.refreshToken.value
-        isLeader = userViewModel.isLeader.value
         leaderId = userViewModel.leaderId.value
 
+        binding = FragmentFinishedProjectsBinding.inflate(inflater, container, false)
 
-        view =  inflater.inflate(R.layout.fragment_projects, container, false)
+        infoTV = binding.finishedProjectsTV
+        recyclerView = binding.finishedProjectsRV
+        refresh = binding.finishedProjectRefresh
 
-
-        snackbar = com.dybich.collabdoapp.Snackbar(view,view.context)
-
-        val addProject : ExtendedFloatingActionButton = view.findViewById(R.id.addProjectBTN)
-        refresh = view.findViewById(R.id.projectRefresh)
-        recyclerView = view.findViewById(R.id.projectRV)
-        infoTV = view.findViewById(R.id.projectsTV)
+        snackbar = com.dybich.collabdoapp.Snackbar(binding.root,binding.root.context)
 
 
-        if(!isLeader!!){
-            addProject.visibility = View.GONE
-        }
-        else{
-            addProject.setOnClickListener {
-                val navController = findNavController()
-                navController.navigate(R.id.addProjectFragment)
-                view.visibility = View.GONE
-            }
-        }
+        if(finishedProjectsViewModel.isSaved){
 
-        if (projectsViewModel.isSaved) {
-
-            if(projectsViewModel.projectList!!.isNotEmpty()){
+            if(finishedProjectsViewModel.projectList!!.isNotEmpty()){
                 infoTV.visibility = View.GONE
-                projects = projectsViewModel.projectList!!
-
-                recyclerView.layoutManager = LinearLayoutManager(view.context)
-                adapter = ProjectsAdapter(projects,refreshToken!!,email!!,password!!, view)
+                finishedProjects = finishedProjectsViewModel.projectList!!
+                recyclerView.layoutManager = LinearLayoutManager(binding.root.context)
+                adapter = FinishedProjectsAdapter(finishedProjects,refreshToken!!,email!!,password!!, binding.root)
                 recyclerView.adapter = adapter
 
 
 
-                val listener = object : ProjectsAdapter.OnItemCLickListener {
+                val listener = object : FinishedProjectsAdapter.OnItemCLickListener {
                     override fun onItemCLick(position: Int) {
-                        projects.removeAt(position)
+                        finishedProjects.removeAt(position)
                         adapter.notifyItemRemoved(position)
-                        for (i in position until projects.size) {
+                        for (i in position until finishedProjects.size) {
                             adapter.notifyItemChanged(i)
                         }
-                        if(projects.size == 0){
+                        if(finishedProjects.size == 0){
                             infoTV.visibility = View.VISIBLE
                         }
                     }
@@ -126,16 +102,16 @@ class ProjectsFragment : Fragment() {
                 infoTV.visibility = View.VISIBLE
             }
 
-        }
 
+        }
 
         refresh.setOnRefreshListener {
             val now : Instant = Instant.now()
             val miliseconds : Long = now.toEpochMilli()
-            performKeycloakAction(miliseconds,leaderId,1,ProjectStatus.InProgress)
+            performKeycloakAction(miliseconds,leaderId,1,ProjectStatus.Finished)
         }
 
-        return view
+        return binding.root
     }
 
     private fun getProjects(accessToken:String,requestDate:Long, leaderId : String?, pageNumber : Int?,projectStatus : ProjectStatus){
@@ -151,21 +127,21 @@ class ProjectsFragment : Fragment() {
                 if (list != null) {
                     if(list.isNotEmpty()){
                         infoTV.visibility = View.GONE
-                        projects = list
-                        recyclerView.layoutManager = LinearLayoutManager(view.context)
-                        adapter = ProjectsAdapter(projects,refreshToken!!,email!!,password!!, view)
+                        finishedProjects = list
+                        recyclerView.layoutManager = LinearLayoutManager(binding.root.context)
+                        adapter = FinishedProjectsAdapter(finishedProjects,refreshToken!!,email!!,password!!, binding.root)
                         recyclerView.adapter = adapter
 
 
 
-                        val listener = object : ProjectsAdapter.OnItemCLickListener {
+                        val listener = object : FinishedProjectsAdapter.OnItemCLickListener {
                             override fun onItemCLick(position: Int) {
-                                projects.removeAt(position)
+                                finishedProjects.removeAt(position)
                                 adapter.notifyItemRemoved(position)
-                                for (i in position until projects.size) {
+                                for (i in position until finishedProjects.size) {
                                     adapter.notifyItemChanged(i)
                                 }
-                                if(projects.size == 0){
+                                if(finishedProjects.size == 0){
                                     infoTV.visibility = View.VISIBLE
                                 }
                             }
@@ -173,15 +149,12 @@ class ProjectsFragment : Fragment() {
                         }
                         adapter.setOnItemCLickListener(listener)
 
-                        projectsViewModel.isSaved = true
-                        projectsViewModel.projectList = projects
+                        finishedProjectsViewModel.isSaved = true
+                        finishedProjectsViewModel.projectList = finishedProjects
 
 
                     }
                     else{
-                        if(!isLeader!!){
-                            infoTV.text = "No projects found."
-                        }
                         infoTV.visibility = View.VISIBLE
                     }
                 }
@@ -196,6 +169,7 @@ class ProjectsFragment : Fragment() {
                 snackbar.show(error)
             })
     }
+
 
     private fun performKeycloakAction(requestDate:Long, leaderId : String?, pageNumber : Int?,projectStatus : ProjectStatus){
         keycloakAPI.getFromRefreshToken(refreshToken!!,

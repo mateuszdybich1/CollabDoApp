@@ -18,6 +18,15 @@
         <item
 
                 android:checkable="true"
+                android:icon="@drawable/finished_icon"
+                android:id="@+id/finishedProjectsFragment"
+                android:title=" Finished Projects">
+
+        </item>
+
+        <item
+
+                android:checkable="true"
                 android:icon="@drawable/person_icon"
                 android:id="@+id/projectGroupFragment"
                 android:title="Project Group">

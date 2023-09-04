@@ -1,4 +1,4 @@
-package com.dybich.collabdoapp.Projects
+package com.dybich.collabdoapp.FinishedProjects
 
 import android.view.LayoutInflater
 import android.view.View
@@ -14,7 +14,7 @@ import com.dybich.collabdoapp.Priority
 import com.dybich.collabdoapp.R
 import com.dybich.collabdoapp.Snackbar
 
-class ProjectsAdapter(private var list : List<ProjectDto>, private var refreshToken : String, private var email : String, private var password : String, private var view:View) : RecyclerView.Adapter<ProjectsViewHolder> () {
+class FinishedProjectsAdapter(private var list : List<ProjectDto>, private var refreshToken : String, private var email : String, private var password : String, private var view:View) : RecyclerView.Adapter<FinishedProjectsViewHolder> () {
     private lateinit var keycloakAPI : KeycloakAPI
     private lateinit var leaderAPI : LeaderAPI
 
@@ -30,16 +30,16 @@ class ProjectsAdapter(private var list : List<ProjectDto>, private var refreshTo
         listener = onItemCLickListener
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProjectsViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FinishedProjectsViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context).inflate(R.layout.project_item, parent, false)
-        return ProjectsViewHolder(layoutInflater)
+        return FinishedProjectsViewHolder(layoutInflater)
     }
 
     override fun getItemCount(): Int {
         return list.size
     }
 
-    override fun onBindViewHolder(holder: ProjectsViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: FinishedProjectsViewHolder, position: Int) {
 
         keycloakAPI = KeycloakAPI()
         leaderAPI = LeaderAPI()
@@ -73,7 +73,7 @@ class ProjectsAdapter(private var list : List<ProjectDto>, private var refreshTo
 
 }
 
-class ProjectsViewHolder(private val itemView: View): RecyclerView.ViewHolder(itemView){
+class FinishedProjectsViewHolder(private val itemView: View): RecyclerView.ViewHolder(itemView){
     val projectName : TextView = itemView.findViewById(R.id.projectName)
     val priority : TextView = itemView.findViewById(R.id.projectPriority)
 

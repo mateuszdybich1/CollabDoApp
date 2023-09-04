@@ -3,7 +3,7 @@ package com.dybich.collabdoapp
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
-class SharedViewModel : ViewModel() {
+class UserViewModel : ViewModel() {
     val refreshToken = MutableLiveData<String>()
     val email = MutableLiveData<String>()
     val password = MutableLiveData<String>()

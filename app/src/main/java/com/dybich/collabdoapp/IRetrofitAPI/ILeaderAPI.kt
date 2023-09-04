@@ -17,7 +17,7 @@ interface ILeaderAPI {
     fun acceptEmployeeRequest(@Header("Authorization") token: String,
                               @Path("requestId") employeeRequestId: String) : Call<String>
 
-    @DELETE("leader/employee/{requestId}")
+    @DELETE("leader/employee/{requestId}/request")
     fun deleteEmployeeRequest(@Header("Authorization") token: String,
                               @Path("requestId") employeeRequestId: String) : Call<String>
 

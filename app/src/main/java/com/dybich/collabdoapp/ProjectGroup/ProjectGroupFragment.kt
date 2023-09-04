@@ -1,17 +1,16 @@
 package com.dybich.collabdoapp.ProjectGroup
 
-import android.content.Intent
+
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.findViewTreeViewModelStoreOwner
-import androidx.navigation.fragment.findNavController
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -19,13 +18,10 @@ import com.dybich.collabdoapp.API.EmployeeAPI
 import com.dybich.collabdoapp.API.KeycloakAPI
 import com.dybich.collabdoapp.API.LeaderAPI
 import com.dybich.collabdoapp.Dtos.EmployeeDto
-import com.dybich.collabdoapp.EmployeeRequests.EmployeeRequestsAdapter
-import com.dybich.collabdoapp.EmployeeRequests.ProjectGroupAdapter
-import com.dybich.collabdoapp.LoggedInActivity
+import com.dybich.collabdoapp.FinishedProjects.FinishedProjectsViewModel
 import com.dybich.collabdoapp.R
-import com.dybich.collabdoapp.SharedViewModel
+import com.dybich.collabdoapp.UserViewModel
 import com.dybich.collabdoapp.Snackbar
-import com.dybich.collabdoapp.login.LoginActivity
 
 
 class ProjectGroupFragment : Fragment() {
@@ -51,7 +47,9 @@ class ProjectGroupFragment : Fragment() {
 
     private lateinit var adapter: ProjectGroupAdapter
 
-    private val sharedViewModel: SharedViewModel by activityViewModels()
+    private lateinit var projectGroupViewModel: ProjectGroupViewModel
+
+    private val userViewModel: UserViewModel by activityViewModels()
 
 
     private lateinit var groupMembers : ArrayList<EmployeeDto>
@@ -65,14 +63,14 @@ class ProjectGroupFragment : Fragment() {
         leaderAPI = LeaderAPI()
         employeeAPI = EmployeeAPI()
 
-        email = sharedViewModel.email.value
-        password = sharedViewModel.password.value
-        refreshToken = sharedViewModel.refreshToken.value
-        isLeader = sharedViewModel.isLeader.value
-        leaderId = sharedViewModel.leaderId.value
+        email = userViewModel.email.value
+        password = userViewModel.password.value
+        refreshToken = userViewModel.refreshToken.value
+        isLeader = userViewModel.isLeader.value
+        leaderId = userViewModel.leaderId.value
 
 
-
+        projectGroupViewModel = ViewModelProvider(this).get(ProjectGroupViewModel::class.java)
 
 
         if(!isLeader!!){
@@ -103,11 +101,47 @@ class ProjectGroupFragment : Fragment() {
         infoTV = view.findViewById(R.id.projectGroupTV)
         recyclerView = view.findViewById(R.id.projectGroupRV)
 
+        Log.d("TEST2",isLeader.toString())
         if(isLeader!!){
             quitButton.visibility = View.GONE
         }
 
-        performKeycloakAction()
+        if(projectGroupViewModel.isSaved){
+            if(projectGroupViewModel.groupList!!.isNotEmpty()){
+                infoTV.visibility = View.GONE
+                groupMembers = projectGroupViewModel.groupList!!
+                recyclerView.layoutManager = LinearLayoutManager(view.context)
+                adapter = ProjectGroupAdapter(groupMembers,refreshToken!!,email!!,password!!,isLeader!!, view)
+                recyclerView.adapter = adapter
+
+
+
+                val listener = object : ProjectGroupAdapter.OnItemCLickListener {
+                    override fun onItemCLick(position: Int) {
+                        groupMembers.removeAt(position)
+                        adapter.notifyItemRemoved(position)
+                        for (i in position until groupMembers.size) {
+                            adapter.notifyItemChanged(i)
+                        }
+                        if(groupMembers.size == 0){
+                            infoTV.visibility = View.VISIBLE
+                        }
+                    }
+
+                }
+                adapter.setOnItemCLickListener(listener)
+
+                projectGroupViewModel.isSaved = true
+                projectGroupViewModel.groupList = groupMembers
+            }
+            else{
+                infoTV.visibility = View.VISIBLE
+            }
+        }
+        else{
+            performKeycloakAction()
+        }
+
 
         refresh.setOnRefreshListener {
             performKeycloakAction()
@@ -160,6 +194,9 @@ class ProjectGroupFragment : Fragment() {
 
                         }
                         adapter.setOnItemCLickListener(listener)
+
+                        projectGroupViewModel.isSaved = true
+                        projectGroupViewModel.groupList = groupMembers
                     }
                     else{
                         infoTV.visibility = View.VISIBLE

@@ -1,4 +1,4 @@
-package com.dybich.collabdoapp.EmployeeRequests
+package com.dybich.collabdoapp.ProjectGroup
 
 import android.view.LayoutInflater
 import android.view.View
@@ -9,7 +9,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.dybich.collabdoapp.API.KeycloakAPI
 import com.dybich.collabdoapp.API.LeaderAPI
 import com.dybich.collabdoapp.Dtos.EmployeeDto
-import com.dybich.collabdoapp.Dtos.EmployeeRequestDto
 import com.dybich.collabdoapp.R
 import com.dybich.collabdoapp.Snackbar
 
