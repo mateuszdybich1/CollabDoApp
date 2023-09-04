@@ -18,7 +18,6 @@ import com.dybich.collabdoapp.API.EmployeeAPI
 import com.dybich.collabdoapp.API.KeycloakAPI
 import com.dybich.collabdoapp.API.LeaderAPI
 import com.dybich.collabdoapp.Dtos.EmployeeDto
-import com.dybich.collabdoapp.FinishedProjects.FinishedProjectsViewModel
 import com.dybich.collabdoapp.R
 import com.dybich.collabdoapp.UserViewModel
 import com.dybich.collabdoapp.Snackbar
@@ -116,7 +115,7 @@ class ProjectGroupFragment : Fragment() {
 
 
 
-                val listener = object : ProjectGroupAdapter.OnItemCLickListener {
+                val listener = object : ProjectGroupAdapter.OnItemCLickListenerGroup {
                     override fun onItemCLick(position: Int) {
                         groupMembers.removeAt(position)
                         adapter.notifyItemRemoved(position)
@@ -180,7 +179,7 @@ class ProjectGroupFragment : Fragment() {
 
 
 
-                        val listener = object : ProjectGroupAdapter.OnItemCLickListener {
+                        val listener = object : ProjectGroupAdapter.OnItemCLickListenerGroup {
                             override fun onItemCLick(position: Int) {
                                 groupMembers.removeAt(position)
                                 adapter.notifyItemRemoved(position)

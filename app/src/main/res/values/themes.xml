@@ -12,7 +12,7 @@
 
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/mainBlue</item>
-        <item name="colorSecondaryVariant">@color/baby_purple</item>
+        <item name="colorSecondaryVariant">@color/white</item>
         <item name="colorOnSecondary">@color/black</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">@color/mainBlue</item>

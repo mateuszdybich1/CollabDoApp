@@ -18,15 +18,25 @@
 
 
             <androidx.recyclerview.widget.RecyclerView
-
-                    tools:listitem="@layout/project_item"
                     android:layout_marginTop="10dp"
+                    tools:listitem="@layout/project_item"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    app:layout_constraintBottom_toBottomOf="parent" android:id="@+id/projectRV"
-                    tools:layout_editor_absoluteX="20dp">
+                    android:layout_height="match_parent" android:id="@+id/projectRV">
+
 
             </androidx.recyclerview.widget.RecyclerView>
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                    android:visibility="gone"
+
+                    android:background="@color/color_transparent_100"
+
+                    android:indeterminate="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent"
+                    android:id="@+id/projectsLoadMore">
+
+            </com.google.android.material.progressindicator.CircularProgressIndicator>
 
             <TextView
                     android:visibility="gone"

@@ -8,6 +8,10 @@
 
     <com.google.android.material.card.MaterialCardView
 
+            android:id="@+id/projectCard"
+            android:clickable="true"
+            android:focusable="true"
+            android:checkable="true"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
             app:cardCornerRadius="30dp"

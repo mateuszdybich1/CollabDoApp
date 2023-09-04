@@ -5,16 +5,20 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import androidx.cardview.widget.CardView
+import androidx.fragment.app.FragmentActivity
+import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.RecyclerView
 import com.dybich.collabdoapp.API.KeycloakAPI
 import com.dybich.collabdoapp.API.LeaderAPI
 import com.dybich.collabdoapp.Dtos.EmployeeDto
 import com.dybich.collabdoapp.Dtos.ProjectDto
 import com.dybich.collabdoapp.Priority
+import com.dybich.collabdoapp.Projects.ProjectsBottomSheet
 import com.dybich.collabdoapp.R
 import com.dybich.collabdoapp.Snackbar
 
-class FinishedProjectsAdapter(private var list : List<ProjectDto>, private var refreshToken : String, private var email : String, private var password : String, private var view:View) : RecyclerView.Adapter<FinishedProjectsViewHolder> () {
+class FinishedProjectsAdapter(private var list : List<ProjectDto>, private var refreshToken : String, private var email : String, private var password : String,private var isLeader : Boolean, private var view:View) : RecyclerView.Adapter<FinishedProjectsViewHolder> () {
     private lateinit var keycloakAPI : KeycloakAPI
     private lateinit var leaderAPI : LeaderAPI
 
@@ -48,6 +52,22 @@ class FinishedProjectsAdapter(private var list : List<ProjectDto>, private var r
 
         holder.projectName.text =list[position].name
         holder.priority.text = list[position].priority.name
+
+        if(isLeader){
+            holder.card.setOnLongClickListener {
+                val manager: FragmentManager = (it.context as FragmentActivity).supportFragmentManager
+                val bottomSheet = FinishedProjectsBottomSheet.newInstance(list[position].projectId!!, refreshToken, email, password,position)
+
+                bottomSheet.show(manager, bottomSheet.tag)
+
+                bottomSheet.setOnItemCLickListener(object : FinishedProjectsBottomSheet.OnItemCLickListenerProject {
+                    override fun onItemCLick(position: Int) {
+                        listener?.onItemCLick(position)
+                    }
+                })
+                true
+            }
+        }
     }
 
     private fun performKeycloakAction(employeeId: String){
@@ -77,5 +97,6 @@ class FinishedProjectsViewHolder(private val itemView: View): RecyclerView.ViewH
     val projectName : TextView = itemView.findViewById(R.id.projectName)
     val priority : TextView = itemView.findViewById(R.id.projectPriority)
 
+    val card : CardView = itemView.findViewById(R.id.projectCard)
 
 }

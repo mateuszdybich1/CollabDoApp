@@ -18,14 +18,14 @@ class ProjectGroupAdapter(private var list : List<EmployeeDto>, private var refr
 
     private lateinit var snackbar : Snackbar
 
-    interface OnItemCLickListener{
+    interface OnItemCLickListenerGroup{
         fun onItemCLick(position : Int)
     }
 
-    private lateinit var listener : OnItemCLickListener
+    private lateinit var listener : OnItemCLickListenerGroup
 
-    public fun setOnItemCLickListener(onItemCLickListener: OnItemCLickListener){
-        listener = onItemCLickListener
+    public fun setOnItemCLickListener(onItemCLickListenerGroup: OnItemCLickListenerGroup){
+        listener = onItemCLickListenerGroup
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProjectGroupViewHolder {

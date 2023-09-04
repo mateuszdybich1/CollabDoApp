@@ -59,6 +59,77 @@ class ProjectAPI () {
 
     }
 
+    fun finishProject(accessToken:String,
+                      projectId:String,
+                      onSuccess: (String) -> Unit,
+                      onFailure: (String) -> Unit){
+        val call = retrofitAPI.finishProject("Bearer $accessToken",projectId)
+
+        call.enqueue(object : Callback<String>{
+
+            override fun onResponse(call: Call<String>, response: Response<String>) {
+                if (response.isSuccessful) {
+                    val projectId = response.body()
+                    if (projectId != null) {
+                        onSuccess(projectId)
+                    } else {
+                        onFailure("ERROR")
+                    }
+                } else {
+                    val errorBody = response.errorBody()!!.string()
+                    onFailure(errorBody)
+                }
+            }
+            override fun onFailure(call: Call<String>, t: Throwable) {
+                if(t.message.toString().contains("Failed to connect")){
+                    onFailure("No internet connection")
+                }
+                else if(t.message.toString().contains("failed to connect")){
+                    onFailure("Server error")
+                }
+                else{
+                    onFailure(t.message.toString())
+                }
+            }
+        })
+    }
+
+
+    fun deleteProject(accessToken:String,
+                      projectId:String,
+                      onSuccess: (String) -> Unit,
+                      onFailure: (String) -> Unit){
+        val call = retrofitAPI.deleteProject("Bearer $accessToken",projectId)
+
+        call.enqueue(object : Callback<String>{
+
+            override fun onResponse(call: Call<String>, response: Response<String>) {
+                if (response.isSuccessful) {
+                    val projectId = response.body()
+                    if (projectId != null) {
+                        onSuccess(projectId)
+                    } else {
+                        onFailure("ERROR")
+                    }
+                } else {
+                    val errorBody = response.errorBody()!!.string()
+                    onFailure(errorBody)
+                }
+            }
+            override fun onFailure(call: Call<String>, t: Throwable) {
+                if(t.message.toString().contains("Failed to connect")){
+                    onFailure("No internet connection")
+                }
+                else if(t.message.toString().contains("failed to connect")){
+                    onFailure("Server error")
+                }
+                else{
+                    onFailure(t.message.toString())
+                }
+            }
+        })
+    }
+
 
     fun getProjects(accessToken:String,
                     requestDate : Long,

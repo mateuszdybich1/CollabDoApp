@@ -10,6 +10,15 @@ interface IProjectAPI {
     @POST("project")
     fun addProject(@Header("Authorization") token: String,
                    @Body projectDto: ProjectDto) : Call<String>
+
+    @PUT("project")
+    fun finishProject(@Header("Authorization") token: String,
+                      @Query("projectId") projectId : String) : Call<String>
+
+    @DELETE("project")
+    fun deleteProject(@Header("Authorization") token: String,
+                      @Query("projectId") projectId : String) : Call<String>
+
     @GET("project")
     fun getProjectList(@Header("Authorization") token: String,
                        @Query("requestDate") requestDate : Long,

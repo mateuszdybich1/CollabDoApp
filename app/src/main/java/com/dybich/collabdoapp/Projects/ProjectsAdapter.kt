@@ -3,31 +3,28 @@ package com.dybich.collabdoapp.Projects
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.TextView
+import androidx.cardview.widget.CardView
+import androidx.fragment.app.FragmentActivity
+import androidx.fragment.app.FragmentManager
+import androidx.navigation.Navigation
 import androidx.recyclerview.widget.RecyclerView
 import com.dybich.collabdoapp.API.KeycloakAPI
 import com.dybich.collabdoapp.API.LeaderAPI
-import com.dybich.collabdoapp.Dtos.EmployeeDto
 import com.dybich.collabdoapp.Dtos.ProjectDto
-import com.dybich.collabdoapp.Priority
 import com.dybich.collabdoapp.R
 import com.dybich.collabdoapp.Snackbar
 
-class ProjectsAdapter(private var list : List<ProjectDto>, private var refreshToken : String, private var email : String, private var password : String, private var view:View) : RecyclerView.Adapter<ProjectsViewHolder> () {
-    private lateinit var keycloakAPI : KeycloakAPI
-    private lateinit var leaderAPI : LeaderAPI
+class ProjectsAdapter(private var list : ArrayList<ProjectDto>, private var refreshToken : String, private var email : String, private var password : String,private var isLeader : Boolean, private var view:View) : RecyclerView.Adapter<ProjectsViewHolder> () {
 
-    private lateinit var snackbar : Snackbar
 
-    interface OnItemCLickListener{
-        fun onItemCLick(position : Int)
+    interface OnItemClickListenerProject {
+        fun onItemCLick(position: Int)
     }
+    private var listener: OnItemClickListenerProject? = null
 
-    private lateinit var listener : OnItemCLickListener
-
-    public fun setOnItemCLickListener(onItemCLickListener: OnItemCLickListener){
-        listener = onItemCLickListener
+    fun setOnItemClickListener(listener: OnItemClickListenerProject) {
+        this.listener = listener
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProjectsViewHolder {
@@ -41,41 +38,47 @@ class ProjectsAdapter(private var list : List<ProjectDto>, private var refreshTo
 
     override fun onBindViewHolder(holder: ProjectsViewHolder, position: Int) {
 
-        keycloakAPI = KeycloakAPI()
-        leaderAPI = LeaderAPI()
 
-        snackbar = com.dybich.collabdoapp.Snackbar(view,view.context)
 
         holder.projectName.text =list[position].name
         holder.priority.text = list[position].priority.name
+
+        holder.card.setOnClickListener{
+            val navController = Navigation.findNavController(view)
+
+            navController.navigate(R.id.taskFragmentMain)
+
+            view.visibility = View.GONE
+        }
+
+        if(isLeader){
+            holder.card.setOnLongClickListener{
+
+                val manager: FragmentManager = (it.context as FragmentActivity).supportFragmentManager
+                val bottomSheet = ProjectsBottomSheet.newInstance(list[position].projectId!!, refreshToken, email, password,position)
+
+                bottomSheet.show(manager, bottomSheet.tag)
+
+                bottomSheet.setOnItemCLickListener(object : ProjectsBottomSheet.OnItemCLickListenerProject {
+                    override fun onItemCLick(position: Int) {
+                        listener?.onItemCLick(position)
+                    }
+                })
+                true
+            }
+
+
+        }
+
     }
-
-    private fun performKeycloakAction(employeeId: String){
-        keycloakAPI.getFromRefreshToken(refreshToken,
-            onSuccess = {data ->
-                refreshToken = data.refresh_token
-
-            },
-            onFailure = {error->
-                if(error == "Refresh token expired" || error=="Token is not active"){
-                    keycloakAPI.getFromEmailAndPass(email,password,
-                        onSuccess = {data ->
-                            refreshToken = data.refresh_token
-
-                        },
-                        onFailure = {err->
-
-                        })
-                }
-            })
-    }
-
 
 }
 
 class ProjectsViewHolder(private val itemView: View): RecyclerView.ViewHolder(itemView){
     val projectName : TextView = itemView.findViewById(R.id.projectName)
     val priority : TextView = itemView.findViewById(R.id.projectPriority)
+
+    val card: CardView = itemView.findViewById(R.id.projectCard)
 
 
 }
