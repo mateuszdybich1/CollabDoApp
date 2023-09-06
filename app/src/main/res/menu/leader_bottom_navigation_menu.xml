@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+            android:id="@+id/myTasksFragment"
+
+            android:icon="@drawable/my_tasks_icon"
+            android:title="My Tasks"/>
+    <item
+            android:id="@+id/waitingTasksFragment"
+
+            android:icon="@drawable/waiting_for_approve_icon"
+            android:title="Waiting For Approvement"/>
+
+    <item
+            android:id="@+id/myAllTasksFragment"
+            android:icon="@drawable/my_all_tasks_icon"
+            android:title="My All Tasks"/>
+    <item
+            android:id="@+id/projectTasksFragment"
+            android:icon="@drawable/all_tasks_icon"
+            android:title="Project Tasks"/>
+
+</menu>

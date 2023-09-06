@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            xmlns:tools="http://schemas.android.com/tools" android:id="@+id/bottom_navigation_container"
+            app:startDestination="@id/myTasksFragment">
+
+    <fragment android:id="@+id/myTasksFragment" android:name="com.dybich.collabdoapp.Tasks.MyTasks.MyTasksFragment"
+              android:label="fragment_my_tasks" tools:layout="@layout/fragment_my_tasks"/>
+    <fragment android:id="@+id/waitingTasksFragment"
+              android:name="com.dybich.collabdoapp.Tasks.WaitingTasks.WaitingTasksFragment"
+              android:label="fragment_waiting_tasks" tools:layout="@layout/fragment_waiting_tasks"/>
+    <fragment android:id="@+id/myAllTasksFragment"
+              android:name="com.dybich.collabdoapp.Tasks.MyAllTasks.MyAllTasksFragment"
+              android:label="fragment_my_all_tasks" tools:layout="@layout/fragment_my_all_tasks"/>
+    <fragment android:id="@+id/projectTasksFragment"
+              android:name="com.dybich.collabdoapp.Tasks.ProjectTasks.ProjectsTaskFragment"
+              android:label="fragment_projects_tasks" tools:layout="@layout/fragment_project_tasks"/>
+</navigation>

@@ -7,7 +7,8 @@
               android:label="fragment_projects" tools:layout="@layout/fragment_projects">
         <action android:id="@+id/action_projectsFragment_to_addProjectFragment"
                 app:destination="@id/addProjectFragment"/>
-        <action android:id="@+id/action_projectsFragment_to_taskFragmentMain" app:destination="@id/taskFragmentMain"/>
+        <action android:id="@+id/action_projectsFragment_to_leaderTaskFragmentMain"
+                app:destination="@id/taskFragmentMain"/>
     </fragment>
     <fragment android:id="@+id/projectGroupFragment" android:name="com.dybich.collabdoapp.ProjectGroup.ProjectGroupFragment"
               android:label="fragment_project_group" tools:layout="@layout/fragment_project_group"/>
@@ -17,7 +18,17 @@
               android:name="com.dybich.collabdoapp.FinishedProjects.FinishedProjectsFragment"
               android:label="fragment_finished_projects" tools:layout="@layout/fragment_finished_projects"/>
     <fragment android:id="@+id/addProjectFragment" android:name="com.dybich.collabdoapp.Projects.AddProjectFragment"
-              android:label="fragment_add_project" tools:layout="@layout/fragment_add_project"/>
-    <fragment android:id="@+id/taskFragmentMain" android:name="com.dybich.collabdoapp.Tasks.TaskFragmentMain"
-              android:label="fragment_task_main" tools:layout="@layout/fragment_task_main"/>
+              android:label="fragment_add_project" tools:layout="@layout/fragment_add_project">
+        <action android:id="@+id/action_addProjectFragment_to_projectsFragment" app:destination="@id/projectsFragment"/>
+    </fragment>
+    <fragment android:id="@+id/taskFragmentMain"
+              android:name="com.dybich.collabdoapp.Tasks.TaskFragmentMain"
+              android:label="fragment_leader_task_main" tools:layout="@layout/fragment_task_main">
+        <action android:id="@+id/action_taskFragmentMain_to_projectsFragment" app:destination="@id/projectsFragment"/>
+        <action android:id="@+id/action_taskFragmentMain_to_addTaskFragment" app:destination="@id/addTaskFragment"/>
+    </fragment>
+    <fragment android:id="@+id/addTaskFragment" android:name="com.dybich.collabdoapp.Tasks.AddTask.AddTaskFragment"
+              android:label="fragment_add_task" tools:layout="@layout/fragment_add_task">
+        <action android:id="@+id/action_addTaskFragment_to_taskFragmentMain" app:destination="@id/taskFragmentMain"/>
+    </fragment>
 </navigation>

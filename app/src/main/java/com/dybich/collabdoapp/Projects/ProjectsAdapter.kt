@@ -1,5 +1,6 @@
 package com.dybich.collabdoapp.Projects
 
+import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -7,13 +8,13 @@ import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.RecyclerView
-import com.dybich.collabdoapp.API.KeycloakAPI
-import com.dybich.collabdoapp.API.LeaderAPI
 import com.dybich.collabdoapp.Dtos.ProjectDto
+import com.dybich.collabdoapp.LoggedInActivity
 import com.dybich.collabdoapp.R
-import com.dybich.collabdoapp.Snackbar
+import com.dybich.collabdoapp.Tasks.TaskViewModel
 
 class ProjectsAdapter(private var list : ArrayList<ProjectDto>, private var refreshToken : String, private var email : String, private var password : String,private var isLeader : Boolean, private var view:View) : RecyclerView.Adapter<ProjectsViewHolder> () {
 
@@ -38,15 +39,17 @@ class ProjectsAdapter(private var list : ArrayList<ProjectDto>, private var refr
 
     override fun onBindViewHolder(holder: ProjectsViewHolder, position: Int) {
 
-
+        val taskViewModel : TaskViewModel = ViewModelProvider(view.context as LoggedInActivity).get(TaskViewModel::class.java)
 
         holder.projectName.text =list[position].name
         holder.priority.text = list[position].priority.name
 
         holder.card.setOnClickListener{
-            val navController = Navigation.findNavController(view)
 
+            val navController = Navigation.findNavController(view)
+            taskViewModel.projectId.value = list[position].projectId
             navController.navigate(R.id.taskFragmentMain)
+
 
             view.visibility = View.GONE
         }

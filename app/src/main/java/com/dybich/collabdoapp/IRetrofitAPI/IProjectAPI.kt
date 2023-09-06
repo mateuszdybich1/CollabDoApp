@@ -11,13 +11,13 @@ interface IProjectAPI {
     fun addProject(@Header("Authorization") token: String,
                    @Body projectDto: ProjectDto) : Call<String>
 
-    @PUT("project")
+    @PUT("project/{projectId}")
     fun finishProject(@Header("Authorization") token: String,
-                      @Query("projectId") projectId : String) : Call<String>
+                      @Path("projectId") projectId : String) : Call<String>
 
-    @DELETE("project")
+    @DELETE("project/{projectId}")
     fun deleteProject(@Header("Authorization") token: String,
-                      @Query("projectId") projectId : String) : Call<String>
+                      @Path("projectId") projectId : String) : Call<String>
 
     @GET("project")
     fun getProjectList(@Header("Authorization") token: String,

@@ -4,11 +4,15 @@
         <item name="colorPrimary">@color/white</item>
         <item name="colorOnPrimary">@color/black</item>
 
+        <item name="colorSurface">@color/white</item>
+        <item name="colorOnSurfaceVariant">@color/white</item>
         <item name="colorOutline">@color/light_grey</item>
-
-
+        <item name="colorPrimaryContainer">@color/white</item>
+        <item name="colorOnPrimaryContainer">@color/white</item>
+        <item name="colorSecondaryContainer">@color/white</item>
+        <item name="colorOnSecondaryContainer">@color/white</item>
         <!-- BOTTOM NAVIGATION. -->
-        <item name="android:navigationBarColor">@color/mainBlue</item>
+
 
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/mainBlue</item>
@@ -29,6 +33,7 @@
 
         <!-- BOTTOM NAVIGATION. -->
         <item name="android:navigationBarColor">@color/mainBlue</item>
+
 
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/mainBlue</item>
@@ -55,5 +60,13 @@
     <style name="RoundShapeAppearanceOverlay" parent="">
         <item name="cornerSize">50%</item>
     </style>
+
+    <style name="CustomBottomNavigationView" parent="Widget.Material3.BottomNavigationView">
+        <item name="colorOnPrimaryContainer">@color/white</item>
+        <item name="colorOnSecondaryContainer">@color/white</item>
+        <item name="colorSecondaryContainer">@color/white</item>
+        <item name="colorPrimaryContainer">@color/white</item>
+    </style>
+
 
 </resources>

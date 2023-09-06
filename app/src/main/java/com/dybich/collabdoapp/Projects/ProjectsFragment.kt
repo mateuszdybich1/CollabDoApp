@@ -97,14 +97,14 @@ class ProjectsFragment : Fragment() {
             }
         }
 
-        if (projectsViewModel.isSaved) {
+        if (projectsViewModel.isSaved.value == true) {
 
-            if(projectsViewModel.projectList!!.isNotEmpty()){
+            if(projectsViewModel.projectList.value!!.isNotEmpty()){
                 infoTV.visibility = View.GONE
 
 
                 recyclerView.layoutManager = LinearLayoutManager(view.context)
-                adapter = ProjectsAdapter(projectsViewModel.projectList!!,refreshToken!!,email!!,password!!,isLeader!!, view)
+                adapter = ProjectsAdapter(projectsViewModel.projectList.value!!,refreshToken!!,email!!,password!!,isLeader!!, view)
 
 
                 recyclerView.adapter = adapter
@@ -113,12 +113,12 @@ class ProjectsFragment : Fragment() {
 
                 val listener = object : ProjectsAdapter.OnItemClickListenerProject {
                     override fun onItemCLick(position: Int) {
-                        projectsViewModel.projectList!!.removeAt(position)
+                        projectsViewModel.projectList.value!!.removeAt(position)
                         adapter.notifyItemRemoved(position)
-                        for (i in position until projectsViewModel.projectList!!.size) {
+                        for (i in position until projectsViewModel.projectList.value!!.size) {
                             adapter.notifyItemChanged(i)
                         }
-                        if(projectsViewModel.projectList!!.size == 0){
+                        if(projectsViewModel.projectList.value!!.size == 0){
                             infoTV.visibility = View.VISIBLE
                         }
                     }
@@ -126,7 +126,7 @@ class ProjectsFragment : Fragment() {
                 }
                 adapter.setOnItemClickListener(listener)
 
-                if(projectsViewModel.projectList!!.size % 10 == 0){
+                if(projectsViewModel.projectList.value!!.size % 10 == 0){
                     recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
                         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                             super.onScrolled(recyclerView, dx, dy)
@@ -142,8 +142,8 @@ class ProjectsFragment : Fragment() {
 
                                 isLoading = true
                                 loadMore.visibility = View.VISIBLE
-                                projectsViewModel.pageNumber++
-                                performKeycloakAction(projectsViewModel.miliseconds!!, leaderId, projectsViewModel.pageNumber, ProjectStatus.InProgress)
+                                projectsViewModel.pageNumber.value = projectsViewModel.pageNumber.value!!+1
+                                performKeycloakAction(projectsViewModel.miliseconds.value!!, leaderId, projectsViewModel.pageNumber.value!!, ProjectStatus.InProgress)
                             }
                         }
                     })
@@ -156,18 +156,18 @@ class ProjectsFragment : Fragment() {
             }
 
         }
-        else if(!projectsViewModel.isSaved){
+        else if(projectsViewModel.isSaved.value == false || projectsViewModel.isSaved.value == null){
             val now : Instant = Instant.now()
-            projectsViewModel.miliseconds = now.toEpochMilli()
-            projectsViewModel.pageNumber = 1
-            performKeycloakAction(projectsViewModel.miliseconds!!,leaderId,projectsViewModel.pageNumber,ProjectStatus.InProgress)
+            projectsViewModel.miliseconds.value = now.toEpochMilli()
+            projectsViewModel.pageNumber.value = 1
+            performKeycloakAction(projectsViewModel.miliseconds.value!!,leaderId,projectsViewModel.pageNumber.value!!,ProjectStatus.InProgress)
         }
 
         refresh.setOnRefreshListener {
             val now : Instant = Instant.now()
-            projectsViewModel.miliseconds = now.toEpochMilli()
-            projectsViewModel.pageNumber = 1
-            performKeycloakAction(projectsViewModel.miliseconds!!,leaderId,projectsViewModel.pageNumber,ProjectStatus.InProgress)
+            projectsViewModel.miliseconds.value = now.toEpochMilli()
+            projectsViewModel.pageNumber.value = 1
+            performKeycloakAction(projectsViewModel.miliseconds.value!!,leaderId,projectsViewModel.pageNumber.value!!,ProjectStatus.InProgress)
         }
 
         return view
@@ -185,11 +185,11 @@ class ProjectsFragment : Fragment() {
 
                 if (list != null) {
                     if(list.isNotEmpty()){
-                        if(projectsViewModel.pageNumber == 1){
+                        if(projectsViewModel.pageNumber.value == 1){
                             infoTV.visibility = View.GONE
-                            projectsViewModel.projectList = list
+                            projectsViewModel.projectList.value = list
                             recyclerView.layoutManager = LinearLayoutManager(view.context)
-                            adapter = ProjectsAdapter(projectsViewModel.projectList!!,refreshToken!!,email!!,password!!,isLeader!!, view)
+                            adapter = ProjectsAdapter(projectsViewModel.projectList.value!!,refreshToken!!,email!!,password!!,isLeader!!, view)
                             recyclerView.adapter = adapter
 
 
@@ -197,12 +197,12 @@ class ProjectsFragment : Fragment() {
 
                             val listener = object : ProjectsAdapter.OnItemClickListenerProject {
                                 override fun onItemCLick(position: Int) {
-                                    projectsViewModel.projectList!!.removeAt(position)
+                                    projectsViewModel.projectList.value!!.removeAt(position)
                                     adapter.notifyItemRemoved(position)
-                                    for (i in position until projectsViewModel.projectList!!.size) {
+                                    for (i in position until projectsViewModel.projectList.value!!.size) {
                                         adapter.notifyItemChanged(i)
                                     }
-                                    if(projectsViewModel.projectList!!.size == 0){
+                                    if(projectsViewModel.projectList.value!!.size == 0){
                                         infoTV.visibility = View.VISIBLE
                                     }
                                 }
@@ -210,7 +210,7 @@ class ProjectsFragment : Fragment() {
                             }
                             adapter.setOnItemClickListener(listener)
 
-                            projectsViewModel.isSaved = true
+                            projectsViewModel.isSaved.value = true
 
                             if(list.size == 10){
                                 recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
@@ -227,8 +227,8 @@ class ProjectsFragment : Fragment() {
                                         if (!isLoading && dy > 0 && totalItemCount - visibleItemCount <= firstVisibleItemPosition + threshold) {
                                             isLoading = true
                                             loadMore.visibility = View.VISIBLE
-                                            projectsViewModel.pageNumber++
-                                            performKeycloakAction(projectsViewModel.miliseconds!!, leaderId, projectsViewModel.pageNumber, ProjectStatus.InProgress)
+                                            projectsViewModel.pageNumber.value = projectsViewModel.pageNumber.value!! +1
+                                            performKeycloakAction(projectsViewModel.miliseconds.value!!, leaderId, projectsViewModel.pageNumber.value!!, ProjectStatus.InProgress)
                                         }
                                     }
                                 })
@@ -236,9 +236,9 @@ class ProjectsFragment : Fragment() {
 
 
                         }
-                        else if(projectsViewModel.pageNumber >1){
+                        else if(projectsViewModel.pageNumber.value!! >1){
                             loadMore.visibility = View.GONE
-                            projectsViewModel.projectList?.addAll(list)
+                            projectsViewModel.projectList.value?.addAll(list)
                             adapter.notifyDataSetChanged()
                         }
                         if (list.size == 0) {
@@ -250,7 +250,7 @@ class ProjectsFragment : Fragment() {
 
                     }
                     else{
-                        if(projectsViewModel.pageNumber>1 && list.size == 0){
+                        if(projectsViewModel.pageNumber.value!!>1 && list.size == 0){
                             snackbar.show("No new items")
                         }
                         else{
