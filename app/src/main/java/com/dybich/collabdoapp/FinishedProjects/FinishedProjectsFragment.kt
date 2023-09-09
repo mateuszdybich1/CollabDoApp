@@ -34,6 +34,7 @@ class FinishedProjectsFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var refresh: SwipeRefreshLayout
     private lateinit var loadMore : CircularProgressIndicator
+    private lateinit var loadData: CircularProgressIndicator
 
     private lateinit var snackbar : Snackbar
 
@@ -73,12 +74,13 @@ class FinishedProjectsFragment : Fragment() {
         recyclerView = binding.finishedProjectsRV
         refresh = binding.finishedProjectRefresh
         loadMore = binding.finishedProjectsLoadMore
+        loadData = binding.loadFinishedProjects
         snackbar = com.dybich.collabdoapp.Snackbar(binding.root,binding.root.context)
 
 
         if(finishedProjectsViewModel.isSaved){
 
-            if(finishedProjectsViewModel.projectList!!.isNotEmpty()){
+            if(finishedProjectsViewModel.projectList != null && finishedProjectsViewModel.projectList!!.isNotEmpty()){
                 infoTV.visibility = View.GONE
 
                 recyclerView.layoutManager = LinearLayoutManager(binding.root.context)
@@ -132,6 +134,7 @@ class FinishedProjectsFragment : Fragment() {
 
         }
         else if(!finishedProjectsViewModel.isSaved){
+            loadData.visibility = View.VISIBLE
             val now : Instant = Instant.now()
             finishedProjectsViewModel.miliseconds = now.toEpochMilli()
             finishedProjectsViewModel.pageNumber = 1
@@ -156,8 +159,8 @@ class FinishedProjectsFragment : Fragment() {
             projectStatus,
             pageNumber,
             onSuccess = {list->
-                refresh.isRefreshing = false
-
+                loadData.visibility = View.GONE
+                finishedProjectsViewModel.isSaved = true
                 if (list != null) {
                     loadMore.visibility = View.GONE
                     if(list.isNotEmpty()){
@@ -186,31 +189,6 @@ class FinishedProjectsFragment : Fragment() {
                             }
                             adapter.setOnItemCLickListener(listener)
 
-                            finishedProjectsViewModel.isSaved = true
-
-                            if(list.size == 10){
-                                recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-                                    override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                                        super.onScrolled(recyclerView, dx, dy)
-
-                                        val layoutManager = recyclerView.layoutManager as LinearLayoutManager
-                                        val visibleItemCount = layoutManager.childCount
-                                        val totalItemCount = layoutManager.itemCount
-                                        val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
-
-                                        val threshold = 10
-
-                                        if (!isLoading && dy > 0 && totalItemCount - visibleItemCount <= firstVisibleItemPosition + threshold) {
-                                            isLoading = true
-                                            loadMore.visibility = View.VISIBLE
-                                            finishedProjectsViewModel.pageNumber++
-                                            performKeycloakAction(finishedProjectsViewModel.miliseconds!!, leaderId, finishedProjectsViewModel.pageNumber, ProjectStatus.Finished)
-                                        }
-                                    }
-                                })
-                            }
-
-
                         }
                         else if(finishedProjectsViewModel.pageNumber >1){
                             loadMore.visibility = View.GONE
@@ -222,7 +200,32 @@ class FinishedProjectsFragment : Fragment() {
                             recyclerView.clearOnScrollListeners()
                         }
 
-                        isLoading = false
+                        if(list.size >0){
+                            isLoading = false
+                        }
+                        if(list.size == 10 && refresh.isRefreshing==false){
+                            recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                                    super.onScrolled(recyclerView, dx, dy)
+
+                                    val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                                    val visibleItemCount = layoutManager.childCount
+                                    val totalItemCount = layoutManager.itemCount
+                                    val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
+
+
+
+                                    if (!isLoading && dy > 0 && (visibleItemCount + firstVisibleItemPosition) >= totalItemCount) {
+                                        isLoading = true
+                                        loadMore.visibility = View.VISIBLE
+                                        finishedProjectsViewModel.pageNumber++
+                                        performKeycloakAction(finishedProjectsViewModel.miliseconds!!, leaderId, finishedProjectsViewModel.pageNumber, ProjectStatus.Finished)
+                                    }
+                                }
+                            })
+                        }
+
+
 
                     }
                     else{
@@ -235,8 +238,10 @@ class FinishedProjectsFragment : Fragment() {
                         loadMore.visibility = View.GONE
 
                     }
+                    refresh.isRefreshing = false
                 }
                 else{
+                    loadData.visibility = View.GONE
                     snackbar.show("ERROR")
                     infoTV.visibility = View.VISIBLE
                     refresh.isRefreshing = false
@@ -244,6 +249,7 @@ class FinishedProjectsFragment : Fragment() {
                 }
 
             }, onFailure ={error->
+                loadData.visibility = View.GONE
                 refresh.isRefreshing = false
                 snackbar.show(error)
                 loadMore.visibility = View.GONE
@@ -268,6 +274,7 @@ class FinishedProjectsFragment : Fragment() {
 
                         },
                         onFailure = {err->
+                            loadData.visibility = View.GONE
                             snackbar.show(err)
                             infoTV.visibility = View.VISIBLE
                             refresh.isRefreshing = false
@@ -275,6 +282,7 @@ class FinishedProjectsFragment : Fragment() {
                         })
                 }
                 else{
+                    loadData.visibility = View.GONE
                     snackbar.show(error)
                     infoTV.visibility = View.VISIBLE
                     refresh.isRefreshing = false

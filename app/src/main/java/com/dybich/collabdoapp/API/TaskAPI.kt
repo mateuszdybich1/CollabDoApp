@@ -8,8 +8,6 @@ import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.Path
-import retrofit2.http.Query
 
 class TaskAPI {
 
@@ -136,46 +134,7 @@ class TaskAPI {
 
     }
 
-    fun getEmployeeTasks(accessToken: String,
-                         projectId:String,
-                         requestDate :Long,
-                         taskStatus : TaskStatus,
-                         pageNumber:Int,
-                         onSuccess: (ArrayList<TaskDto>) -> Unit,
-                         onFailure: (String) -> Unit){
-
-        val call = retrofitAPI.getEmployeeTasks("Bearer $accessToken",projectId,requestDate,taskStatus,pageNumber)
-
-        call.enqueue(object : Callback<ArrayList<TaskDto>> {
-
-            override fun onResponse(call: Call<ArrayList<TaskDto>>, response: Response<ArrayList<TaskDto>>) {
-                if (response.isSuccessful) {
-                    val taskList = response.body()
-                    if (taskList != null) {
-                        onSuccess(taskList)
-                    } else {
-                        onFailure("Empty LIST")
-                    }
-                } else {
-                    val errorBody = response.errorBody()!!.string()
-                    onFailure(errorBody)
-                }
-            }
-            override fun onFailure(call: Call<ArrayList<TaskDto>>, t: Throwable) {
-                if(t.message.toString().contains("Failed to connect")){
-                    onFailure("No internet connection")
-                }
-                else if(t.message.toString().contains("failed to connect")){
-                    onFailure("Server error")
-                }
-                else{
-                    onFailure(t.message.toString())
-                }
-            }
-        })
-
-    }
-    fun getLeaderTasks(accessToken: String,
+    fun getUserTasks(accessToken: String,
                        projectId:String,
                        requestDate :Long,
                        taskStatus : TaskStatus,
@@ -183,7 +142,7 @@ class TaskAPI {
                        onSuccess: (ArrayList<TaskDto>) -> Unit,
                        onFailure: (String) -> Unit){
 
-        val call = retrofitAPI.getLeaderTasks("Bearer $accessToken",projectId,requestDate,taskStatus,pageNumber)
+        val call = retrofitAPI.getUserTasks("Bearer $accessToken",projectId,requestDate,taskStatus,pageNumber)
 
         call.enqueue(object : Callback<ArrayList<TaskDto>> {
 

@@ -5,56 +5,103 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.dybich.collabdoapp.R
+import androidx.fragment.app.FragmentActivity
+import androidx.fragment.app.activityViewModels
+import androidx.viewpager2.adapter.FragmentStateAdapter
+import androidx.viewpager2.widget.ViewPager2
+import com.dybich.collabdoapp.Tasks.RefreshLayoutViewModel
+import com.dybich.collabdoapp.Tasks.ProjectTasks.Done.ProjectDoneTasksFragment
+import com.dybich.collabdoapp.Tasks.ProjectTasks.PendingTasks.ProjectsPendingTasksFragment
+import com.dybich.collabdoapp.Tasks.ProjectTasks.StartedTasks.ProjectStartedTasksFragment
+import com.dybich.collabdoapp.Tasks.ProjectTasks.Undone.ProjectsUndoneTasksFragment
+import com.dybich.collabdoapp.databinding.FragmentProjectTasksMainBinding
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
 
-/**
- * A simple [Fragment] subclass.
- * Use the [ProjectsTaskFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class ProjectsTaskFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+
+
+
+    private lateinit var binding : FragmentProjectTasksMainBinding
+
+    private val sharedViewModel: RefreshLayoutViewModel by activityViewModels()
+
+    private lateinit var viewPager:ViewPager2
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
+
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_project_tasks, container, false)
+
+        binding = FragmentProjectTasksMainBinding.inflate(inflater, container, false)
+
+
+        viewPager= binding.projectTasksViewPager
+
+        setupViewPager()
+
+
+        return binding.root
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment ProjectsTasksFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            ProjectsTaskFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
+
+
+    private fun setupViewPager() {
+
+        viewPager.adapter = MyFragmentStateAdapter(requireActivity())
+
+        val tabLayout: TabLayout = binding.tabLayout
+        TabLayoutMediator(tabLayout, viewPager) { tab, position ->
+            tab.text = when (position) {
+                0 -> "Started"
+                1 -> "Pending"
+                2 -> "Done"
+                else -> "Undone"
             }
+        }.attach()
     }
+
+    override fun onResume() {
+        super.onResume()
+
+        if(sharedViewModel.shouldRefresh.value == true){
+            if(isAdded){
+                sharedViewModel.shouldRefresh.value = false
+                val activity = requireActivity()
+                viewPager.adapter = MyFragmentStateAdapter(activity)
+                setupViewPager()
+            }
+        }
+
+
+    }
+     class MyFragmentStateAdapter(fragmentActivity: FragmentActivity) : FragmentStateAdapter(fragmentActivity) {
+        override fun getItemCount(): Int = 4
+
+         override fun getItemId(position: Int): Long {
+             return position.toLong()
+         }
+
+         override fun containsItem(itemId: Long): Boolean {
+             return itemId < itemCount
+         }
+
+        override fun createFragment(position: Int): Fragment {
+            return when (position) {
+                0 -> ProjectStartedTasksFragment()
+                1 -> ProjectsPendingTasksFragment()
+                2 -> ProjectDoneTasksFragment()
+                else -> ProjectsUndoneTasksFragment()
+            }
+        }
+    }
+
+
+
 }

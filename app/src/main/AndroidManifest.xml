@@ -20,6 +20,7 @@
                 android:name=".login.ResetPasswordActivity"
                 android:exported="false"/>
         <activity
+                android:windowSoftInputMode="adjustPan"
                 android:name=".LoggedInActivity"
                 android:theme="@style/MenuTheme"
                 android:exported="false"/>

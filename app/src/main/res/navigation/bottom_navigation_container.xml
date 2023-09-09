@@ -12,7 +12,7 @@
     <fragment android:id="@+id/myAllTasksFragment"
               android:name="com.dybich.collabdoapp.Tasks.MyAllTasks.MyAllTasksFragment"
               android:label="fragment_my_all_tasks" tools:layout="@layout/fragment_my_all_tasks"/>
-    <fragment android:id="@+id/projectTasksFragment"
+    <fragment android:id="@+id/projectTasksMainFragment"
               android:name="com.dybich.collabdoapp.Tasks.ProjectTasks.ProjectsTaskFragment"
-              android:label="fragment_projects_tasks" tools:layout="@layout/fragment_project_tasks"/>
+              android:label="fragment_projects_tasks" tools:layout="@layout/fragment_project_tasks_main"/>
 </navigation>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+        android:padding="40dp"
+        android:background="@color/secondaryBlue"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:context=".Tasks.MyTasks.MyTasksBottomSheet" xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/myTasksBottomSheetLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+        <Button
+                android:backgroundTint="@color/white"
+                android:textColor="@color/secondaryBlue"
+                android:textSize="18sp"
+                android:text="Finish task"
+                android:id="@+id/myTasksBottomSheetButton"
+                android:layout_width="match_parent" android:layout_height="70dp"
+                app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent">
+
+        </Button>
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+
+                android:visibility="gone"
+                android:background="@color/color_transparent_100"
+
+                android:indeterminate="true"
+                android:id="@+id/myTasksBottomSheetCircle"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</FrameLayout>

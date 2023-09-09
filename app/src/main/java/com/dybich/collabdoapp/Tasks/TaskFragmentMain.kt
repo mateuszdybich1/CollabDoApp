@@ -1,10 +1,13 @@
 package com.dybich.collabdoapp.Tasks
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.addCallback
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
@@ -35,8 +38,15 @@ class TaskFragmentMain : Fragment() {
     private lateinit var addTaskButton : ExtendedFloatingActionButton
     private lateinit var bottomNavigation : BottomNavigationView
 
+    private lateinit var callback:OnBackPressedCallback
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        callback = requireActivity().onBackPressedDispatcher.addCallback(this, true) {
+            Log.d("MyFragment", "onBackPressed callback called")
+            findNavController().navigateUp()
+        }
 
     }
 
@@ -83,6 +93,18 @@ class TaskFragmentMain : Fragment() {
 
         return binding.root
     }
+
+    override fun onResume() {
+        super.onResume()
+        callback.isEnabled = true
+    }
+
+    override fun onPause() {
+        super.onPause()
+        callback.isEnabled = false
+    }
+
+
 
 
 

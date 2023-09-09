@@ -9,7 +9,6 @@ import android.widget.Toast
 import com.dybich.collabdoapp.API.KeycloakAPI
 import com.dybich.collabdoapp.API.ProjectAPI
 import com.dybich.collabdoapp.ButtonTransition
-import com.dybich.collabdoapp.ProjectStatus
 import com.dybich.collabdoapp.R
 import com.dybich.collabdoapp.Snackbar
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -68,7 +67,7 @@ class FinishedProjectsBottomSheet : BottomSheetDialogFragment()  {
 
         view =  inflater.inflate(R.layout.projects_bottom_sheet, container, false)
         transition = ButtonTransition(
-            view.findViewById(R.id.projectsBottomSheetLayout),
+            view.findViewById(R.id.taskMainBottomSheetLayout),
             view.findViewById(R.id.projectsBottomSheetCircle),
             view.findViewById(R.id.projectBottomSheetButton),
             view.context)
@@ -96,12 +95,13 @@ class FinishedProjectsBottomSheet : BottomSheetDialogFragment()  {
     private fun deleteProject(accessToken:String, projectId: String){
         projectAPI.deleteProject(accessToken,projectId,
             onSuccess = {projectId->
-                transition.stopLoading()
+
                     if(projectId!=null){
                         Toast.makeText(view.context,"Project deleted", Toast.LENGTH_LONG).show()
                         listener?.onItemCLick(position)
                         dismiss()
                     }
+                transition.stopLoading()
             },
             onFailure = {error->
                 snackbar.show(error)

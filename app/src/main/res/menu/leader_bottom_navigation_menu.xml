@@ -10,14 +10,14 @@
             android:id="@+id/waitingTasksFragment"
 
             android:icon="@drawable/waiting_for_approve_icon"
-            android:title="Waiting For Approvement"/>
+            android:title="Pending"/>
 
     <item
             android:id="@+id/myAllTasksFragment"
             android:icon="@drawable/my_all_tasks_icon"
             android:title="My All Tasks"/>
     <item
-            android:id="@+id/projectTasksFragment"
+            android:id="@+id/projectTasksMainFragment"
             android:icon="@drawable/all_tasks_icon"
             android:title="Project Tasks"/>
 

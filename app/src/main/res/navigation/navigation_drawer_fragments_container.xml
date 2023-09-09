@@ -26,9 +26,17 @@
               android:label="fragment_leader_task_main" tools:layout="@layout/fragment_task_main">
         <action android:id="@+id/action_taskFragmentMain_to_projectsFragment" app:destination="@id/projectsFragment"/>
         <action android:id="@+id/action_taskFragmentMain_to_addTaskFragment" app:destination="@id/addTaskFragment"/>
+        <action android:id="@+id/action_taskFragmentMain_to_taskDetailsFragment2"
+                app:destination="@id/taskDetailsFragment"/>
     </fragment>
     <fragment android:id="@+id/addTaskFragment" android:name="com.dybich.collabdoapp.Tasks.AddTask.AddTaskFragment"
               android:label="fragment_add_task" tools:layout="@layout/fragment_add_task">
         <action android:id="@+id/action_addTaskFragment_to_taskFragmentMain" app:destination="@id/taskFragmentMain"/>
+    </fragment>
+    <fragment android:id="@+id/taskDetailsFragment"
+              android:name="com.dybich.collabdoapp.TaskDetails.TaskDetailsFragment"
+              android:label="fragment_task_details" tools:layout="@layout/fragment_task_details">
+        <action android:id="@+id/action_taskDetailsFragment_to_taskFragmentMain"
+                app:destination="@id/taskFragmentMain"/>
     </fragment>
 </navigation>

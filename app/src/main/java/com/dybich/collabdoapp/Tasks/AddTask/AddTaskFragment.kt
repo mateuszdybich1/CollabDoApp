@@ -1,25 +1,24 @@
 package com.dybich.collabdoapp.Tasks.AddTask
 
+import android.annotation.SuppressLint
+import android.app.AlertDialog
+import android.content.res.ColorStateList
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.dybich.collabdoapp.*
-import com.dybich.collabdoapp.API.EmployeeAPI
 import com.dybich.collabdoapp.API.KeycloakAPI
 import com.dybich.collabdoapp.API.LeaderAPI
 import com.dybich.collabdoapp.API.TaskAPI
 import com.dybich.collabdoapp.Dtos.TaskDto
 import com.dybich.collabdoapp.Tasks.TaskViewModel
-import com.dybich.collabdoapp.databinding.FragmentAddProjectBinding
 import com.dybich.collabdoapp.databinding.FragmentAddTaskBinding
-import com.dybich.collabdoapp.databinding.FragmentTaskMainBinding
 import com.dybich.collabdoapp.login.ClearErrors
 import com.dybich.collabdoapp.login.ErrorObj
 import com.google.android.material.datepicker.MaterialDatePicker
@@ -42,7 +41,8 @@ class AddTaskFragment : Fragment() {
     private val userViewModel: UserViewModel by activityViewModels()
     private val taskViewModel: TaskViewModel by activityViewModels()
 
-    private lateinit var transition : ButtonTransition
+    private lateinit var addTaskTransition : ButtonTransition
+    private lateinit var selectUserTransition : ButtonTransition
 
     private lateinit var snackbar : Snackbar
 
@@ -60,10 +60,12 @@ class AddTaskFragment : Fragment() {
     private lateinit var taskDescritpionET : TextInputEditText
 
     private lateinit var selectDateButton : Button
+    private lateinit var selectedUserButton:Button
 
     private var priorityChecked : Priority = Priority.Low
 
     private lateinit var dateTextView:TextView
+    private lateinit var userTextView:TextView
 
     private var deadlineMilis:Long = 1
 
@@ -73,7 +75,6 @@ class AddTaskFragment : Fragment() {
         keycloakAPI = KeycloakAPI()
         taskAPI = TaskAPI()
         leaderAPI = LeaderAPI()
-
 
     }
 
@@ -89,16 +90,24 @@ class AddTaskFragment : Fragment() {
 
         binding = FragmentAddTaskBinding.inflate(inflater, container, false)
 
-        transition = ButtonTransition(
+        addTaskTransition = ButtonTransition(
             binding.addTaskLayout,
             binding.LoadingCircle,
             binding.addTaskButton,
             binding.root.context)
 
+        selectUserTransition = ButtonTransition(
+            binding.addTaskLayout,
+            binding.selectUserLoadingCIrcle,
+            binding.addTaskPickUserBTN,
+            binding.root.context
+        )
+
         snackbar = com.dybich.collabdoapp.Snackbar(binding.root,binding.root.context)
 
         backButton = binding.fragmentAddTaskBackButton
         selectDateButton = binding.addTaskPickDateBTN
+        selectedUserButton = binding.addTaskPickUserBTN
 
         taskNameETL =binding.addTaskNameETL
         taskNameET = binding.addTaskNameET
@@ -112,6 +121,12 @@ class AddTaskFragment : Fragment() {
         ClearErrors.clearErrors(listOf(taskNameErrorObj,taskDescrErrorObj))
 
         dateTextView = binding.addTaskDateTV
+        userTextView = binding.addTaskUserTV
+        userTextView.text = email
+
+        backButton.setOnClickListener{
+            findNavController().navigateUp()
+        }
 
 
         binding.addTaskRadioGroup.setOnCheckedChangeListener{group, checkedId ->
@@ -128,12 +143,22 @@ class AddTaskFragment : Fragment() {
             }
         }
 
+
+
+        selectedUserButton.setOnClickListener{
+            selectUserTransition.startLoading()
+            performKeycloakAction(null,"getEmployees")
+        }
+
+
+
         val selectedDateTime = Calendar.getInstance()
         selectedDateTime.add(Calendar.DAY_OF_YEAR, 1)
         val format = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
         val formattedDate = format.format(selectedDateTime.time)
-
+        deadlineMilis = selectedDateTime.timeInMillis
         dateTextView.text = formattedDate
+
 
         selectDateButton.setOnClickListener{
             val datePicker = MaterialDatePicker.Builder.datePicker().build()
@@ -150,7 +175,7 @@ class AddTaskFragment : Fragment() {
                         .build()
 
                 picker.addOnPositiveButtonClickListener {
-                    // Ustawiamy wybraną godzinę i minutę w zmiennej selectedDateTime
+
                     selectedDateTime.set(Calendar.HOUR_OF_DAY, picker.hour)
                     selectedDateTime.set(Calendar.MINUTE, picker.minute)
 
@@ -166,16 +191,13 @@ class AddTaskFragment : Fragment() {
 
 
 
-        backButton.setOnClickListener{
-            findNavController().navigateUp()
-        }
-
-
         binding.addTaskButton.setOnClickListener{
             if(taskNameET.text!!.length in 1..30 &&
                 taskDescritpionET.text!!.length in 1..100){
 
-                transition.startLoading()
+                val taskDto = TaskDto(null,projectId!!,taskNameET.text!!.toString(),taskDescritpionET.text!!.toString(),priorityChecked,userTextView.text.toString(),TaskStatus.Started,null,deadlineMilis)
+                addTaskTransition.startLoading()
+                performKeycloakAction(taskDto,"addTask")
 
             }
             else{
@@ -209,12 +231,15 @@ class AddTaskFragment : Fragment() {
 
         taskAPI.addTask(accessToken,taskDto,
         onSuccess = {taskId->
+            addTaskTransition.stopLoading()
             if (taskId!=null){
                 Toast.makeText(binding.root.context,"Task added successfully", Toast.LENGTH_LONG).show()
+                findNavController().navigateUp()
             }
         },
         onFailure = { error->
             snackbar.show(error)
+            addTaskTransition.stopLoading()
         })
 
     }
@@ -222,14 +247,65 @@ class AddTaskFragment : Fragment() {
     private fun getEmployees(accessToken: String,){
         leaderAPI.getEmployeeList(accessToken,null,
             onSuccess = {list->
+                selectUserTransition.stopLoading()
                  if(list!=null){
+                    if(list.isNotEmpty()){
 
+                        val builder = AlertDialog.Builder(binding.root.context,R.style.SelectUserAlertDialogStyle)
+                        builder.setTitle("Assign user to task")
+
+                        val radioGroup = RadioGroup(binding.root.context)
+                        radioGroup.setPadding(60,10,20,20)
+
+                        val radioButton = RadioButton(binding.root.context)
+                        val colorStateList = ContextCompat.getColorStateList(binding.root.context, R.color.radio_button_selector)
+                        radioButton.buttonTintList = colorStateList
+
+                        radioButton.setTextColor(ContextCompat.getColor(binding.root.context, R.color.white))
+
+                        radioButton.text = email
+                        radioGroup.addView(radioButton)
+                        for (item in list) {
+                            val radioButton = RadioButton(binding.root.context)
+                            radioButton.buttonTintList = colorStateList
+                            radioButton.setTextColor(ContextCompat.getColor(binding.root.context, R.color.white))
+                            radioButton.text = item.email
+                            radioGroup.addView(radioButton)
+                        }
+
+                        builder.setView(radioGroup)
+
+                        builder.setPositiveButton("OK") { dialog, which ->
+                            val selectedId = radioGroup.checkedRadioButtonId
+                            val selectedRadioButton = radioGroup.findViewById<RadioButton>(selectedId)
+                            val selectedItem = selectedRadioButton.text
+                            userTextView.text = selectedItem
+                        }
+
+                        builder.setNegativeButton("Cancel") { dialog, which ->
+                            dialog.dismiss()
+                        }
+
+                       val dialog = builder.create()
+                        dialog.setOnShowListener {
+                            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(ContextCompat.getColor(binding.root.context, R.color.white))
+                            dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(ContextCompat.getColor(binding.root.context, R.color.white))
+                            dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setTextColor(ContextCompat.getColor(binding.root.context, R.color.white))
+                        }
+                        dialog.show()
+                    }
+                     else{
+                        snackbar.show("You don't have project members")
+                    }
                  }
             },
             onFailure = {error->
                 snackbar.show(error)
+                selectUserTransition.stopLoading()
             })
     }
+
+
 
     private fun performKeycloakAction(taskDto: TaskDto?,requestType:String) {
         keycloakAPI.getFromRefreshToken(refreshToken!!,
@@ -252,9 +328,13 @@ class AddTaskFragment : Fragment() {
                         },
                         onFailure = { err ->
                             snackbar.show(err)
+                            addTaskTransition.stopLoading()
+                            selectUserTransition.stopLoading()
                         })
                 } else {
                     snackbar.show(error)
+                    addTaskTransition.stopLoading()
+                    selectUserTransition.stopLoading()
                 }
 
             })

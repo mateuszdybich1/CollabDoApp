@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+            android:id="@+id/myTasksFragment"
+
+            android:title="Started"/>
+    <item
+            android:id="@+id/waitingTasksFragment"
+
+            android:title="Pending"/>
+
+    <item
+            android:id="@+id/myAllTasksFragment"
+            android:title="Done"/>
+    <item
+            android:id="@+id/projectTasksMainFragment"
+
+            android:title="Undone"/>
+</menu>

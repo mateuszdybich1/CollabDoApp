@@ -21,6 +21,7 @@ import com.dybich.collabdoapp.Dtos.EmployeeDto
 import com.dybich.collabdoapp.R
 import com.dybich.collabdoapp.UserViewModel
 import com.dybich.collabdoapp.Snackbar
+import com.google.android.material.progressindicator.CircularProgressIndicator
 
 
 class ProjectGroupFragment : Fragment() {
@@ -50,6 +51,7 @@ class ProjectGroupFragment : Fragment() {
 
     private val userViewModel: UserViewModel by activityViewModels()
 
+    private lateinit var loadGroup : CircularProgressIndicator
 
     private lateinit var groupMembers : ArrayList<EmployeeDto>
 
@@ -99,6 +101,7 @@ class ProjectGroupFragment : Fragment() {
         refresh = view.findViewById(R.id.projectGroupRefresh)
         infoTV = view.findViewById(R.id.projectGroupTV)
         recyclerView = view.findViewById(R.id.projectGroupRV)
+        loadGroup = view.findViewById(R.id.loadProjectsGroup)
 
         Log.d("TEST2",isLeader.toString())
         if(isLeader!!){
@@ -106,7 +109,7 @@ class ProjectGroupFragment : Fragment() {
         }
 
         if(projectGroupViewModel.isSaved){
-            if(projectGroupViewModel.groupList!!.isNotEmpty()){
+            if(projectGroupViewModel.groupList!=null && projectGroupViewModel.groupList!!.isNotEmpty()){
                 infoTV.visibility = View.GONE
                 groupMembers = projectGroupViewModel.groupList!!
                 recyclerView.layoutManager = LinearLayoutManager(view.context)
@@ -138,6 +141,7 @@ class ProjectGroupFragment : Fragment() {
             }
         }
         else{
+            loadGroup.visibility = View.VISIBLE
             performKeycloakAction()
         }
 
@@ -152,7 +156,8 @@ class ProjectGroupFragment : Fragment() {
 
 
     private fun getLeaderEmail(leaderId:String){
-        leaderAPI.getLeaderEmail(leaderId, onSuccess = {email->
+        leaderAPI.getLeaderEmail(leaderId,
+            onSuccess = {email->
               if(email != null){
                   leader.text = email
               }
@@ -168,7 +173,9 @@ class ProjectGroupFragment : Fragment() {
         leaderAPI.getEmployeeList(accessToken,
             leaderId,
             onSuccess = {list ->
+                loadGroup.visibility = View.GONE
                 refresh.isRefreshing = false
+                projectGroupViewModel.isSaved = true
                 if (list != null) {
                     if(list.isNotEmpty()){
                         infoTV.visibility = View.GONE
@@ -194,7 +201,6 @@ class ProjectGroupFragment : Fragment() {
                         }
                         adapter.setOnItemCLickListener(listener)
 
-                        projectGroupViewModel.isSaved = true
                         projectGroupViewModel.groupList = groupMembers
                     }
                     else{
@@ -211,6 +217,7 @@ class ProjectGroupFragment : Fragment() {
                 snackbar.show(error)
                 infoTV.visibility = View.VISIBLE
                 refresh.isRefreshing = false
+                loadGroup.visibility = View.GONE
             })
     }
 
@@ -234,12 +241,14 @@ class ProjectGroupFragment : Fragment() {
                             snackbar.show(err)
                             infoTV.visibility = View.VISIBLE
                             refresh.isRefreshing = false
+                            loadGroup.visibility = View.GONE
                         })
                 }
                 else{
                     snackbar.show(error)
                     infoTV.visibility = View.VISIBLE
                     refresh.isRefreshing = false
+                    loadGroup.visibility = View.GONE
                 }
 
             })

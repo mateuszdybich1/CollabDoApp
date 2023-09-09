@@ -9,7 +9,6 @@ import android.widget.Toast
 import com.dybich.collabdoapp.API.KeycloakAPI
 import com.dybich.collabdoapp.API.ProjectAPI
 import com.dybich.collabdoapp.ButtonTransition
-import com.dybich.collabdoapp.ProjectStatus
 import com.dybich.collabdoapp.R
 import com.dybich.collabdoapp.Snackbar
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -68,7 +67,7 @@ class ProjectsBottomSheet : BottomSheetDialogFragment()  {
 
         view =  inflater.inflate(R.layout.projects_bottom_sheet, container, false)
         transition = ButtonTransition(
-            view.findViewById(R.id.projectsBottomSheetLayout),
+            view.findViewById(R.id.taskMainBottomSheetLayout),
             view.findViewById(R.id.projectsBottomSheetCircle),
             view.findViewById(R.id.projectBottomSheetButton),
             view.context)
@@ -95,12 +94,13 @@ class ProjectsBottomSheet : BottomSheetDialogFragment()  {
     private fun finishProject(accessToken:String, projectId: String){
         projectAPI.finishProject(accessToken,projectId,
             onSuccess = {projectId->
-                transition.stopLoading()
+
                     if(projectId!=null){
                         Toast.makeText(view.context,"Project finished", Toast.LENGTH_LONG).show()
                         listener?.onItemCLick(position)
                         dismiss()
                     }
+                transition.stopLoading()
             },
             onFailure = {error->
                 snackbar.show(error)

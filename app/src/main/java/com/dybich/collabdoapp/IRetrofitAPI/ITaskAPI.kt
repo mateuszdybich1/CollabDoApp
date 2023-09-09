@@ -1,6 +1,5 @@
 package com.dybich.collabdoapp.IRetrofitAPI
 
-import com.dybich.collabdoapp.Dtos.ProjectDto
 import com.dybich.collabdoapp.Dtos.TaskDto
 import com.dybich.collabdoapp.TaskStatus
 import retrofit2.Call
@@ -33,19 +32,13 @@ interface ITaskAPI {
                    @Path("taskId")taskId:String) : Call<String>
 
 
-    @GET("task/employee/{projectId}")
-    fun getEmployeeTasks(@Header("Authorization") token: String,
-                         @Path("projectId") projectId:String,
-                         @Query("requestDate") requestDate :Long,
-                         @Query("taskStatus") taskStatus : TaskStatus,
-                         @Query("pageNumber") pageNumber:Int) : Call<ArrayList<TaskDto>>
 
-    @GET("task/leader/{projectId}")
-    fun getLeaderTasks(@Header("Authorization") token: String,
-                       @Path("projectId") projectId:String,
-                       @Query("requestDate") requestDate :Long,
-                       @Query("taskStatus") taskStatus : TaskStatus,
-                       @Query("pageNumber") pageNumber:Int) : Call<ArrayList<TaskDto>>
+    @GET("task/user/{projectId}")
+    fun getUserTasks(@Header("Authorization") token: String,
+                     @Path("projectId") projectId:String,
+                     @Query("requestDate") requestDate :Long,
+                     @Query("taskStatus") taskStatus : TaskStatus,
+                     @Query("pageNumber") pageNumber:Int) : Call<ArrayList<TaskDto>>
 
     @GET("task/all/{projectId}")
     fun getAllTasks(@Header("Authorization") token: String,

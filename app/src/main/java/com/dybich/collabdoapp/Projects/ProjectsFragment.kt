@@ -37,6 +37,7 @@ class ProjectsFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var refresh: SwipeRefreshLayout
     private lateinit var loadMore :CircularProgressIndicator
+    private lateinit var loadProjects : CircularProgressIndicator
 
     private val userViewModel: UserViewModel by activityViewModels()
 
@@ -74,8 +75,8 @@ class ProjectsFragment : Fragment() {
         leaderId = userViewModel.leaderId.value
 
 
-        view =  inflater.inflate(R.layout.fragment_projects, container, false)
 
+        view =  inflater.inflate(R.layout.fragment_projects, container, false)
 
         snackbar = com.dybich.collabdoapp.Snackbar(view,view.context)
 
@@ -84,6 +85,7 @@ class ProjectsFragment : Fragment() {
         recyclerView = view.findViewById(R.id.projectRV)
         infoTV = view.findViewById(R.id.projectsTV)
         loadMore = view.findViewById(R.id.projectsLoadMore)
+        loadProjects = view.findViewById(R.id.loadProjects)
 
 
         if(!isLeader!!){
@@ -99,7 +101,7 @@ class ProjectsFragment : Fragment() {
 
         if (projectsViewModel.isSaved.value == true) {
 
-            if(projectsViewModel.projectList.value!!.isNotEmpty()){
+            if(projectsViewModel.projectList.value!= null && projectsViewModel.projectList.value!!.isNotEmpty()){
                 infoTV.visibility = View.GONE
 
 
@@ -136,9 +138,8 @@ class ProjectsFragment : Fragment() {
                             val totalItemCount = layoutManager.itemCount
                             val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
 
-                            val threshold = 10
 
-                            if (!isLoading && dy > 0 && totalItemCount - visibleItemCount <= firstVisibleItemPosition + threshold) {
+                            if (!isLoading && dy > 0 && (visibleItemCount + firstVisibleItemPosition) >= totalItemCount && projectsViewModel.projectList.value!!.size % 10==0) {
 
                                 isLoading = true
                                 loadMore.visibility = View.VISIBLE
@@ -157,6 +158,7 @@ class ProjectsFragment : Fragment() {
 
         }
         else if(projectsViewModel.isSaved.value == false || projectsViewModel.isSaved.value == null){
+            loadProjects.visibility = View.VISIBLE
             val now : Instant = Instant.now()
             projectsViewModel.miliseconds.value = now.toEpochMilli()
             projectsViewModel.pageNumber.value = 1
@@ -181,8 +183,8 @@ class ProjectsFragment : Fragment() {
             projectStatus,
             pageNumber,
             onSuccess = {list->
-                refresh.isRefreshing = false
-
+                loadProjects.visibility = View.GONE
+                projectsViewModel.isSaved.value = true
                 if (list != null) {
                     if(list.isNotEmpty()){
                         if(projectsViewModel.pageNumber.value == 1){
@@ -210,30 +212,6 @@ class ProjectsFragment : Fragment() {
                             }
                             adapter.setOnItemClickListener(listener)
 
-                            projectsViewModel.isSaved.value = true
-
-                            if(list.size == 10){
-                                recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-                                    override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                                        super.onScrolled(recyclerView, dx, dy)
-
-                                        val layoutManager = recyclerView.layoutManager as LinearLayoutManager
-                                        val visibleItemCount = layoutManager.childCount
-                                        val totalItemCount = layoutManager.itemCount
-                                        val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
-
-                                        val threshold = 10
-
-                                        if (!isLoading && dy > 0 && totalItemCount - visibleItemCount <= firstVisibleItemPosition + threshold) {
-                                            isLoading = true
-                                            loadMore.visibility = View.VISIBLE
-                                            projectsViewModel.pageNumber.value = projectsViewModel.pageNumber.value!! +1
-                                            performKeycloakAction(projectsViewModel.miliseconds.value!!, leaderId, projectsViewModel.pageNumber.value!!, ProjectStatus.InProgress)
-                                        }
-                                    }
-                                })
-                            }
-
 
                         }
                         else if(projectsViewModel.pageNumber.value!! >1){
@@ -245,35 +223,73 @@ class ProjectsFragment : Fragment() {
                             loadMore.visibility = View.GONE
                             recyclerView.clearOnScrollListeners()
                         }
+                        if(list.size>0){
+                            isLoading = false
+                        }
 
-                        isLoading = false
+                        if(list.size == 10 && refresh.isRefreshing == false){
+                            recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                                    super.onScrolled(recyclerView, dx, dy)
+
+                                    val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                                    val visibleItemCount = layoutManager.childCount
+                                    val totalItemCount = layoutManager.itemCount
+                                    val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
+
+
+
+                                    if (!isLoading && dy > 0 && (visibleItemCount + firstVisibleItemPosition) >= totalItemCount && projectsViewModel.projectList.value!!.size % 10 == 0) {
+                                        isLoading = true
+                                        loadMore.visibility = View.VISIBLE
+                                        projectsViewModel.pageNumber.value = projectsViewModel.pageNumber.value!! +1
+                                        performKeycloakAction(projectsViewModel.miliseconds.value!!, leaderId, projectsViewModel.pageNumber.value!!, ProjectStatus.InProgress)
+                                    }
+                                }
+                            })
+                        }
+
+
 
                     }
                     else{
                         if(projectsViewModel.pageNumber.value!!>1 && list.size == 0){
                             snackbar.show("No new items")
+
                         }
                         else{
                             if(!isLeader!!){
                                 infoTV.text = "No projects found."
+
                             }
                             infoTV.visibility = View.VISIBLE
                         }
+
                         loadMore.visibility = View.GONE
 
                     }
                 }
                 else{
                     snackbar.show("ERROR")
-                    infoTV.visibility = View.VISIBLE
+                    if(projectsViewModel.projectList.value!!.size == 0){
+                        infoTV.visibility = View.VISIBLE
+                    }
                     refresh.isRefreshing = false
                     loadMore.visibility = View.GONE
+                    isLoading = false
                 }
+                refresh.isRefreshing = false
 
             }, onFailure ={error->
                 refresh.isRefreshing = false
+                if(projectsViewModel.projectList.value!!.size == 0){
+                    infoTV.visibility = View.VISIBLE
+                }
+
                 snackbar.show(error)
                 loadMore.visibility = View.GONE
+                isLoading = false
+                loadProjects.visibility = View.GONE
             })
     }
 
@@ -293,16 +309,24 @@ class ProjectsFragment : Fragment() {
                         },
                         onFailure = {err->
                             snackbar.show(err)
-                            infoTV.visibility = View.VISIBLE
+                            if(projectsViewModel.projectList.value!!.size == 0){
+                                infoTV.visibility = View.VISIBLE
+                            }
                             refresh.isRefreshing = false
                             loadMore.visibility = View.GONE
+                            isLoading = false
+                            loadProjects.visibility = View.GONE
                         })
                 }
                 else{
                     snackbar.show(error)
-                    infoTV.visibility = View.VISIBLE
+                    if(projectsViewModel.projectList.value!!.size == 0){
+                        infoTV.visibility = View.VISIBLE
+                    }
                     refresh.isRefreshing = false
                     loadMore.visibility = View.GONE
+                    isLoading = false
+                    loadProjects.visibility = View.GONE
                 }
 
             })

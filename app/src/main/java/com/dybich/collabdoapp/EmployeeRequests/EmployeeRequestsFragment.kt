@@ -18,6 +18,7 @@ import com.dybich.collabdoapp.FinishedProjects.FinishedProjectsViewModel
 import com.dybich.collabdoapp.R
 import com.dybich.collabdoapp.UserViewModel
 import com.dybich.collabdoapp.Snackbar
+import com.google.android.material.progressindicator.CircularProgressIndicator
 
 
 class EmployeeRequestsFragment : Fragment() {
@@ -34,6 +35,8 @@ class EmployeeRequestsFragment : Fragment() {
     private lateinit var infoTV: TextView
     private lateinit var recyclerView: RecyclerView
     private lateinit var refresh: SwipeRefreshLayout
+
+    private lateinit var loadRequests :CircularProgressIndicator
 
     private lateinit var requestsAdapter : EmployeeRequestsAdapter
 
@@ -70,10 +73,11 @@ class EmployeeRequestsFragment : Fragment() {
         infoTV = view.findViewById(R.id.employeeRequestTV)
         recyclerView = view.findViewById(R.id.employeeRequestsRV)
         refresh = view.findViewById(R.id.employeeRequestsRefresh)
+        loadRequests = view.findViewById(R.id.loadRequests)
 
-        if(requestsViewModel.isSaved){
+        if(requestsViewModel.isSaved == true){
 
-            if(requestsViewModel.requestsList!!.isNotEmpty()){
+            if(requestsViewModel.requestsList!=null && requestsViewModel.requestsList!!.isNotEmpty()){
                 infoTV.visibility = View.GONE
                 requestList = requestsViewModel.requestsList!!
                 recyclerView.layoutManager = LinearLayoutManager(view.context)
@@ -102,6 +106,7 @@ class EmployeeRequestsFragment : Fragment() {
             }
         }
         else if(requestsViewModel.isSaved == false){
+            loadRequests.visibility = View.VISIBLE
             performKeycloakAction()
         }
 
@@ -117,7 +122,9 @@ class EmployeeRequestsFragment : Fragment() {
     private fun getEmployeeRequests( accessToken : String){
         leaderAPI.getEmployeesRequests(accessToken,
             onSuccess = {list ->
+                loadRequests.visibility = View.GONE
                 refresh.isRefreshing = false
+                requestsViewModel.isSaved = true
                 if (list != null) {
                     if(list.isNotEmpty()){
                         infoTV.visibility = View.GONE
@@ -143,7 +150,7 @@ class EmployeeRequestsFragment : Fragment() {
                         }
                         requestsAdapter.setOnItemCLickListener(listener)
 
-                        requestsViewModel.isSaved = true
+
                         requestsViewModel.requestsList = requestList
                     }
                     else{
@@ -157,6 +164,7 @@ class EmployeeRequestsFragment : Fragment() {
                 }
             },
             onFailure = {error->
+                loadRequests.visibility = View.GONE
                 snackbar.show(error)
                 infoTV.visibility = View.VISIBLE
                 refresh.isRefreshing = false
@@ -177,12 +185,14 @@ class EmployeeRequestsFragment : Fragment() {
                             getEmployeeRequests(data.access_token)
                         },
                         onFailure = {err->
+                            loadRequests.visibility = View.GONE
                             snackbar.show(err)
                             infoTV.visibility = View.VISIBLE
                             refresh.isRefreshing = false
                         })
                 }
                 else{
+                    loadRequests.visibility = View.GONE
                     snackbar.show(error)
                     infoTV.visibility = View.VISIBLE
                     refresh.isRefreshing = false

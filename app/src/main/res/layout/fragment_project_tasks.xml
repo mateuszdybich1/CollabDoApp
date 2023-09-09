@@ -1,14 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             xmlns:tools="http://schemas.android.com/tools"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent"
-             tools:context=".Tasks.ProjectTasks.ProjectsTaskFragment">
+<FrameLayout
+        android:background="@color/mainBlue"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/projectTasksRefresh"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="project tasks"/>
+            android:layout_height="match_parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+
+                    android:visibility="gone"
+                    android:background="@color/color_transparent_100"
+
+                    android:indeterminate="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent"
+                    android:id="@+id/LoadData" app:layout_constraintTop_toTopOf="parent">
+
+            </com.google.android.material.progressindicator.CircularProgressIndicator>
+
+
+            <androidx.recyclerview.widget.RecyclerView
+
+                    tools:listitem="@layout/task_item"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp" android:id="@+id/projectTasksRV"
+                    app:layout_constraintBottom_toTopOf="@+id/projectTasksLoadMore"
+                    app:layout_constraintTop_toTopOf="parent">
+
+
+            </androidx.recyclerview.widget.RecyclerView>
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+
+
+                    android:visibility="gone"
+                    android:background="@color/color_transparent_100"
+
+                    android:indeterminate="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent"
+                    android:id="@+id/projectTasksLoadMore">
+
+            </com.google.android.material.progressindicator.CircularProgressIndicator>
+
+            <TextView
+                    android:visibility="gone"
+                    android:id="@+id/projectTasksTV"
+                    android:gravity="center_horizontal|center_vertical"
+                    android:textSize="30sp"
+                    android:textColor="@color/white"
+                    android:text="No tasks found."
+                    android:layout_margin="50dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent">
+
+            </TextView>
+
+
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+
 
 </FrameLayout>
